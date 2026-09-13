@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: beira-linha-play-api
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    hikari:
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:10}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  allowed-hosts: ${APP_ALLOWED_HOSTS}
+  jwt:
+    secret: ${JWT_SECRET}
+    access-token-minutos: 15
+    refresh-token-dias: 7
+  cookie:
+    secure: ${APP_COOKIE_SECURE}
+    same-site: ${APP_COOKIE_SAME_SITE}
+    access-name: blp_access
+    refresh-name: blp_refresh

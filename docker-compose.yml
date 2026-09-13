@@ -1,0 +1,14 @@
+services:
+  api:
+    build: .
+    image: beira-linha-play-api
+    container_name: beira-linha-play-api
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    restart: unless-stopped

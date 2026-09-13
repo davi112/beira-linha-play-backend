@@ -1,0 +1,54 @@
+package br.icei.beiralinhaplay.apresentacao.erro;
+
+import br.icei.beiralinhaplay.dominio.compartilhado.ForbiddenException;
+import br.icei.beiralinhaplay.dominio.compartilhado.InvalidCredentialsException;
+import br.icei.beiralinhaplay.dominio.compartilhado.DomainException;
+import br.icei.beiralinhaplay.dominio.compartilhado.ResourceNotFoundException;
+import br.icei.beiralinhaplay.dominio.compartilhado.BusinessRuleException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponse> credenciais(InvalidCredentialsException ex) {
+        return erro(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> acesso(ForbiddenException ex) {
+        return erro(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> naoEncontrado(ResourceNotFoundException ex) {
+        return erro(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<ErrorResponse> regra(BusinessRuleException ex) {
+        return erro(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    @ExceptionHandler(DomainException.class)
+    public ResponseEntity<ErrorResponse> dominio(DomainException ex) {
+        return erro(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> validacao(MethodArgumentNotValidException ex) {
+        String mensagem = ex.getBindingResult().getFieldErrors().stream()
+                .findFirst()
+                .map(error -> error.getDefaultMessage())
+                .orElse("Dados inválidos");
+        return erro(HttpStatus.BAD_REQUEST, mensagem);
+    }
+
+    private static ResponseEntity<ErrorResponse> erro(HttpStatus status, String mensagem) {
+        return ResponseEntity.status(status).body(new ErrorResponse(mensagem, status.value()));
+    }
+}
