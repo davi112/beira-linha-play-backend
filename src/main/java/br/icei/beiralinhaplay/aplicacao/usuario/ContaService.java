@@ -12,6 +12,7 @@ import br.icei.beiralinhaplay.dominio.usuario.UsuarioRepository;
 import br.icei.beiralinhaplay.dominio.usuario.TipoUsuario;
 import br.icei.beiralinhaplay.dominio.usuario.Usuario;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class ContaService {
@@ -74,7 +75,7 @@ public class ContaService {
     }
 
     public java.util.List<Monitor> listarMonitores(Usuario solicitante) {
-        if (solicitante.tipo() != TipoUsuario.ADMIN) {
+        if (!TipoUsuario.aptosGerenciamentoCursos().contains(solicitante.tipo())) {
             throw new ForbiddenException();
         }
         return repositorioUsuario.listarMonitores();
