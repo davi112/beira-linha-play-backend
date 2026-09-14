@@ -15,6 +15,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -24,10 +25,16 @@ public class SecurityConfig {
 
     private final JwtFilter filtroJwt;
     private final ApplicationProperties propriedades;
+    private final JsonUnauthorizedEntryPoint naoAutenticado;
 
-    public SecurityConfig(JwtFilter filtroJwt, ApplicationProperties propriedades) {
+    public SecurityConfig(
+            JwtFilter filtroJwt,
+            ApplicationProperties propriedades,
+            JsonUnauthorizedEntryPoint naoAutenticado
+    ) {
         this.filtroJwt = filtroJwt;
         this.propriedades = propriedades;
+        this.naoAutenticado = naoAutenticado;
     }
 
     @Bean
@@ -36,6 +43,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .anonymous(anonimo -> anonimo.disable())
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(naoAutenticado))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/cadastro", "/api/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -48,12 +57,23 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(propriedades.getAllowedHosts().split(",")));
+        configuration.setAllowedOrigins(origensPermitidas());
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Content-Type", "Accept"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    private List<String> origensPermitidas() {
+        String hosts = propriedades.getAllowedHosts();
+        if (hosts == null || hosts.isBlank()) {
+            return List.of("http://localhost:5173");
+        }
+        return Arrays.stream(hosts.split(","))
+                .map(String::trim)
+                .filter(origem -> !origem.isEmpty())
+                .toList();
     }
 }

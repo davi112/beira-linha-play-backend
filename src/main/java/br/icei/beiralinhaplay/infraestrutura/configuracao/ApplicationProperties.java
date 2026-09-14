@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app")
 public class ApplicationProperties {
 
-    private String allowedHosts;
+    private String allowedHosts = "http://localhost:5173";
     private Jwt jwt = new Jwt();
     private Cookie cookie = new Cookie();
 
