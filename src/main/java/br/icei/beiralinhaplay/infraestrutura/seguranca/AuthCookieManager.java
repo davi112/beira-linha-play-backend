@@ -58,9 +58,12 @@ public class AuthCookieManager {
     }
 
     private ResponseCookie.ResponseCookieBuilder base(String nome, String valor) {
+        String sameSite = propriedades.getCookie().getSameSite();
+        boolean crossSite = sameSite != null && sameSite.equalsIgnoreCase("None");
         return ResponseCookie.from(nome, valor == null ? "" : valor)
                 .httpOnly(true)
-                .secure(propriedades.getCookie().isSecure())
-                .sameSite(propriedades.getCookie().getSameSite());
+                .secure(crossSite || propriedades.getCookie().isSecure())
+                .sameSite(sameSite)
+                .partitioned(crossSite);
     }
 }
