@@ -57,7 +57,7 @@ public class CursoRepositoryAdapter implements CursoRepository {
 
     @Override
     public void excluir(UUID id) {
-        cursoJpaRepository.deleteById(id);
+        cursoJpaRepository.buscarCompleto(id).ifPresent(cursoJpaRepository::delete);
     }
 
     @Override

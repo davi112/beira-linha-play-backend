@@ -3,6 +3,8 @@ package br.icei.beiralinhaplay.infraestrutura.configuracao;
 import br.icei.beiralinhaplay.aplicacao.atividade.AtividadeService;
 import br.icei.beiralinhaplay.aplicacao.autenticacao.AutenticacaoService;
 import br.icei.beiralinhaplay.aplicacao.curso.CursoService;
+import br.icei.beiralinhaplay.aplicacao.ia.GeracaoQuestoesService;
+import br.icei.beiralinhaplay.aplicacao.ia.GeradorQuestoes;
 import br.icei.beiralinhaplay.aplicacao.medalha.MedalhaService;
 import br.icei.beiralinhaplay.aplicacao.modulo.ModuloService;
 import br.icei.beiralinhaplay.aplicacao.ranking.RankingService;
@@ -66,8 +68,21 @@ public class UseCaseConfig {
     }
 
     @Bean
-    ModuloService servicoModulo(ModuloRepository repositorioModulo, CursoRepository repositorioCurso) {
-        return new ModuloService(repositorioModulo, repositorioCurso);
+    ModuloService servicoModulo(
+            ModuloRepository repositorioModulo,
+            CursoRepository repositorioCurso,
+            AtividadeRepository repositorioAtividade
+    ) {
+        return new ModuloService(repositorioModulo, repositorioCurso, repositorioAtividade);
+    }
+
+    @Bean
+    GeracaoQuestoesService servicoGeracaoQuestoes(
+            ModuloRepository repositorioModulo,
+            CursoRepository repositorioCurso,
+            GeradorQuestoes geradorQuestoes
+    ) {
+        return new GeracaoQuestoesService(repositorioModulo, repositorioCurso, geradorQuestoes);
     }
 
     @Bean

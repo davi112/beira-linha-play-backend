@@ -4,6 +4,8 @@ import br.icei.beiralinhaplay.aplicacao.atividade.SalvarAtividadeCommand;
 import br.icei.beiralinhaplay.aplicacao.autenticacao.AutenticarCommand;
 import br.icei.beiralinhaplay.aplicacao.autenticacao.RegistrarCommand;
 import br.icei.beiralinhaplay.aplicacao.curso.SalvarCursoCommand;
+import br.icei.beiralinhaplay.aplicacao.ia.GerarQuestoesCommand;
+import br.icei.beiralinhaplay.aplicacao.ia.QuestaoGerada;
 import br.icei.beiralinhaplay.aplicacao.medalha.SalvarMedalhaCommand;
 import br.icei.beiralinhaplay.aplicacao.medalha.MedalhaComStatus;
 import br.icei.beiralinhaplay.aplicacao.modulo.SalvarModuloCommand;
@@ -63,6 +65,27 @@ public final class DtoConverter {
 
     public static SalvarModuloCommand comando(SalvarModuloRequest req) {
         return new SalvarModuloCommand(req.nome());
+    }
+
+    public static GerarQuestoesCommand comando(GerarQuestoesRequest req) {
+        return new GerarQuestoesCommand(req.mensagem(), req.quantidadeQuestoes());
+    }
+
+    public static GerarQuestoesResponse questoesGeradas(List<QuestaoGerada> questoes) {
+        return new GerarQuestoesResponse(
+                questoes.stream()
+                        .map(q -> new GerarQuestoesResponse.QuestaoGeradaResponse(
+                                q.enunciado(),
+                                q.valor(),
+                                q.alternativas().stream()
+                                        .map(a -> new GerarQuestoesResponse.AlternativaGeradaResponse(
+                                                a.descricao(),
+                                                a.correta()
+                                        ))
+                                        .toList()
+                        ))
+                        .toList()
+        );
     }
 
     public static SalvarAtividadeCommand comando(SalvarAtividadeRequest req) {

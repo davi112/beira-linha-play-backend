@@ -1,8 +1,11 @@
 package br.icei.beiralinhaplay.apresentacao.rest;
 
 import br.icei.beiralinhaplay.aplicacao.atividade.AtividadeService;
+import br.icei.beiralinhaplay.aplicacao.ia.GeracaoQuestoesService;
 import br.icei.beiralinhaplay.aplicacao.modulo.ModuloService;
 import br.icei.beiralinhaplay.apresentacao.dto.DtoConverter;
+import br.icei.beiralinhaplay.apresentacao.dto.GerarQuestoesRequest;
+import br.icei.beiralinhaplay.apresentacao.dto.GerarQuestoesResponse;
 import br.icei.beiralinhaplay.apresentacao.dto.ModuloResponse;
 import br.icei.beiralinhaplay.apresentacao.dto.SalvarModuloRequest;
 import jakarta.validation.Valid;
@@ -24,10 +27,16 @@ public class ModuloController {
 
     private final ModuloService servicoModulo;
     private final AtividadeService servicoAtividade;
+    private final GeracaoQuestoesService servicoGeracaoQuestoes;
 
-    public ModuloController(ModuloService servicoModulo, AtividadeService servicoAtividade) {
+    public ModuloController(
+            ModuloService servicoModulo,
+            AtividadeService servicoAtividade,
+            GeracaoQuestoesService servicoGeracaoQuestoes
+    ) {
         this.servicoModulo = servicoModulo;
         this.servicoAtividade = servicoAtividade;
+        this.servicoGeracaoQuestoes = servicoGeracaoQuestoes;
     }
 
     @PostMapping("/api/cursos/{cursoId}/modulos")
@@ -69,5 +78,19 @@ public class ModuloController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void excluir(@PathVariable String id, Authentication authentication) {
         servicoModulo.excluir(AuthHttp.usuario(authentication), DtoConverter.id(id));
+    }
+
+    @PostMapping("/api/modulos/{id}/gerar-questoes")
+    public GerarQuestoesResponse gerarQuestoes(
+            @PathVariable String id,
+            Authentication authentication,
+            @Valid @RequestBody GerarQuestoesRequest requisicao
+    ) {
+        var questoes = servicoGeracaoQuestoes.gerar(
+                AuthHttp.usuario(authentication),
+                DtoConverter.id(id),
+                DtoConverter.comando(requisicao)
+        );
+        return DtoConverter.questoesGeradas(questoes);
     }
 }

@@ -1,7 +1,9 @@
 package br.icei.beiralinhaplay.aplicacao.modulo;
 
+import br.icei.beiralinhaplay.dominio.atividade.AtividadeRepository;
 import br.icei.beiralinhaplay.dominio.compartilhado.ForbiddenException;
 import br.icei.beiralinhaplay.dominio.compartilhado.ResourceNotFoundException;
+import br.icei.beiralinhaplay.dominio.compartilhado.BusinessRuleException;
 import br.icei.beiralinhaplay.dominio.curso.Curso;
 import br.icei.beiralinhaplay.dominio.curso.CursoRepository;
 import br.icei.beiralinhaplay.dominio.modulo.Modulo;
@@ -16,10 +18,16 @@ public class ModuloService {
 
     private final ModuloRepository repositorioModulo;
     private final CursoRepository repositorioCurso;
+    private final AtividadeRepository repositorioAtividade;
 
-    public ModuloService(ModuloRepository repositorioModulo, CursoRepository repositorioCurso) {
+    public ModuloService(
+            ModuloRepository repositorioModulo,
+            CursoRepository repositorioCurso,
+            AtividadeRepository repositorioAtividade
+    ) {
         this.repositorioModulo = repositorioModulo;
         this.repositorioCurso = repositorioCurso;
+        this.repositorioAtividade = repositorioAtividade;
     }
 
     public List<Modulo> listarPorCurso(UUID cursoId) {
@@ -53,6 +61,9 @@ public class ModuloService {
         Curso curso = repositorioCurso.buscarPorId(modulo.cursoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Curso não encontrado"));
         exigirMonitorDoCurso(solicitante, curso);
+        if (repositorioAtividade.possuiTentativasNoModulo(id)) {
+            throw new BusinessRuleException("Não é possível excluir um módulo que possui atividades com tentativas");
+        }
         repositorioModulo.excluir(id);
     }
 

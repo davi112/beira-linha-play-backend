@@ -33,3 +33,6 @@ app:
     same-site: ${APP_COOKIE_SAME_SITE}
     access-name: blp_access
     refresh-name: blp_refresh
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    model: gemini-2.5-flash

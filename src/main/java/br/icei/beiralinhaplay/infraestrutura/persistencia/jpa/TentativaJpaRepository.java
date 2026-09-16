@@ -21,6 +21,8 @@ public interface TentativaJpaRepository extends JpaRepository<TentativaEntity, U
 
     boolean existsByAtividadeId(UUID atividadeId);
 
+    boolean existsByAtividade_Modulo_Id(UUID moduloId);
+
     @EntityGraph(attributePaths = {"respostas", "respostas.questao", "respostas.alternativa", "aluno", "atividade"})
     @Query("select t from TentativaEntity t where t.id = :id")
     Optional<TentativaEntity> buscarCompleto(UUID id);
