@@ -35,11 +35,6 @@ public class GeminiGeradorQuestoes implements GeradorQuestoes {
                 .build();
     }
 
-    GeminiGeradorQuestoes(ApplicationProperties propriedades, RestClient restClient) {
-        this.propriedades = propriedades;
-        this.restClient = restClient;
-    }
-
     @Override
     public String gerar(String prompt, String systemInstruction) {
         String chave = propriedades.getGemini().getApiKey();
