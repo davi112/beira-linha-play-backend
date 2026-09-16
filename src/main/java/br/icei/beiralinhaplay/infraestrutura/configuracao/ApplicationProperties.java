@@ -8,6 +8,7 @@ public class ApplicationProperties {
     private String allowedHosts = "http://localhost:5173";
     private Jwt jwt = new Jwt();
     private Cookie cookie = new Cookie();
+    private Gemini gemini = new Gemini();
 
     public String getAllowedHosts() {
         return allowedHosts;
@@ -31,6 +32,14 @@ public class ApplicationProperties {
 
     public void setCookie(Cookie cookie) {
         this.cookie = cookie;
+    }
+
+    public Gemini getGemini() {
+        return gemini;
+    }
+
+    public void setGemini(Gemini gemini) {
+        this.gemini = gemini;
     }
 
     public static class Jwt {
@@ -99,6 +108,27 @@ public class ApplicationProperties {
 
         public void setRefreshName(String refreshName) {
             this.refreshName = refreshName;
+        }
+    }
+
+    public static class Gemini {
+        private String apiKey = "";
+        private String model = "gemini-2.5-flash";
+
+        public String getApiKey() {
+            return apiKey;
+        }
+
+        public void setApiKey(String apiKey) {
+            this.apiKey = apiKey;
+        }
+
+        public String getModel() {
+            return model;
+        }
+
+        public void setModel(String model) {
+            this.model = model;
         }
     }
 }

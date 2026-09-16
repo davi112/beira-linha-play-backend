@@ -15,4 +15,6 @@ public interface AtividadeRepository {
     void excluir(UUID id);
 
     boolean possuiTentativas(UUID atividadeId);
+
+    boolean possuiTentativasNoModulo(UUID moduloId);
 }

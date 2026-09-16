@@ -58,6 +58,6 @@ public class ModuloRepositoryAdapter implements ModuloRepository {
 
     @Override
     public void excluir(UUID id) {
-        moduloJpaRepository.deleteById(id);
+        moduloJpaRepository.buscarCompleto(id).ifPresent(moduloJpaRepository::delete);
     }
 }

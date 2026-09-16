@@ -4,7 +4,9 @@ import br.icei.beiralinhaplay.dominio.compartilhado.ForbiddenException;
 import br.icei.beiralinhaplay.dominio.compartilhado.InvalidCredentialsException;
 import br.icei.beiralinhaplay.dominio.compartilhado.DomainException;
 import br.icei.beiralinhaplay.dominio.compartilhado.ResourceNotFoundException;
+import br.icei.beiralinhaplay.dominio.compartilhado.BadGatewayException;
 import br.icei.beiralinhaplay.dominio.compartilhado.BusinessRuleException;
+import br.icei.beiralinhaplay.dominio.compartilhado.ServiceUnavailableException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -32,6 +34,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<ErrorResponse> regra(BusinessRuleException ex) {
         return erro(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> indisponivel(ServiceUnavailableException ex) {
+        return erro(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
+    }
+
+    @ExceptionHandler(BadGatewayException.class)
+    public ResponseEntity<ErrorResponse> origem(BadGatewayException ex) {
+        return erro(HttpStatus.BAD_GATEWAY, ex.getMessage());
     }
 
     @ExceptionHandler(DomainException.class)

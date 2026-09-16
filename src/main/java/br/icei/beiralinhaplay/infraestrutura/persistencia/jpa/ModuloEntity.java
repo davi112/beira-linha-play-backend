@@ -1,5 +1,6 @@
 package br.icei.beiralinhaplay.infraestrutura.persistencia.jpa;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -32,8 +33,7 @@ public class ModuloEntity {
     @JoinColumn(name = "curso_id")
     private CursoEntity curso;
 
-    @OneToMany
-    @JoinColumn(name = "modulo_id")
+    @OneToMany(mappedBy = "modulo", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id ASC")
     private List<AtividadeEntity> atividades = new ArrayList<>();
 

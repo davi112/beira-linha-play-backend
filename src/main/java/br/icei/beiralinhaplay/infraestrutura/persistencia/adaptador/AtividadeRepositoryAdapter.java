@@ -74,4 +74,10 @@ public class AtividadeRepositoryAdapter implements AtividadeRepository {
     public boolean possuiTentativas(UUID atividadeId) {
         return tentativaJpaRepository.existsByAtividadeId(atividadeId);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean possuiTentativasNoModulo(UUID moduloId) {
+        return tentativaJpaRepository.existsByAtividade_Modulo_Id(moduloId);
+    }
 }
