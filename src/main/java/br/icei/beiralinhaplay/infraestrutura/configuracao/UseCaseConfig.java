@@ -58,7 +58,10 @@ public class UseCaseConfig {
     }
 
     @Bean
-    ContaService servicoConta(UsuarioRepository repositorioUsuario, PasswordHasher codificadorSenha) {
+    ContaService servicoConta(
+            UsuarioRepository repositorioUsuario,
+            PasswordHasher codificadorSenha
+    ) {
         return new ContaService(repositorioUsuario, codificadorSenha);
     }
 

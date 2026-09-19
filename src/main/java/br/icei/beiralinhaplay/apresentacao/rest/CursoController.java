@@ -39,8 +39,9 @@ public class CursoController {
     public List<CursoResponse> listar(Authentication authentication) {
         Usuario usuario = AuthHttp.usuario(authentication);
         boolean codigo = usuario.tipo() != TipoUsuario.ALUNO;
+        var nomes = servicoCurso.mapaNomesMonitores();
         return servicoCurso.listar(usuario).stream()
-                .map(curso -> DtoConverter.curso(curso, servicoModulo.listarPorCurso(curso.id()), codigo))
+                .map(curso -> DtoConverter.curso(curso, servicoModulo.listarPorCurso(curso.id()), codigo, nomes))
                 .toList();
     }
 
@@ -49,7 +50,12 @@ public class CursoController {
         Usuario usuario = AuthHttp.usuario(authentication);
         var curso = servicoCurso.buscar(usuario, DtoConverter.id(id));
         boolean codigo = usuario.tipo() != TipoUsuario.ALUNO;
-        return DtoConverter.curso(curso, servicoModulo.listarPorCurso(curso.id()), codigo);
+        return DtoConverter.curso(
+                curso,
+                servicoModulo.listarPorCurso(curso.id()),
+                codigo,
+                servicoCurso.mapaNomesMonitores()
+        );
     }
 
     @PostMapping
@@ -59,7 +65,7 @@ public class CursoController {
             @Valid @RequestBody SalvarCursoRequest requisicao
     ) {
         var curso = servicoCurso.criar(AuthHttp.usuario(authentication), DtoConverter.comando(requisicao));
-        return DtoConverter.curso(curso, List.of(), true);
+        return DtoConverter.curso(curso, List.of(), true, servicoCurso.mapaNomesMonitores());
     }
 
     @PatchMapping("/{id}")
@@ -73,7 +79,12 @@ public class CursoController {
                 DtoConverter.id(id),
                 DtoConverter.comando(requisicao)
         );
-        return DtoConverter.curso(curso, servicoModulo.listarPorCurso(curso.id()), true);
+        return DtoConverter.curso(
+                curso,
+                servicoModulo.listarPorCurso(curso.id()),
+                true,
+                servicoCurso.mapaNomesMonitores()
+        );
     }
 
     @DeleteMapping("/{id}")
@@ -91,7 +102,12 @@ public class CursoController {
                 AuthHttp.usuario(authentication),
                 requisicao.codigoAcesso()
         );
-        return DtoConverter.curso(curso, servicoModulo.listarPorCurso(curso.id()), false);
+        return DtoConverter.curso(
+                curso,
+                servicoModulo.listarPorCurso(curso.id()),
+                false,
+                servicoCurso.mapaNomesMonitores()
+        );
     }
 
     @PostMapping("/{id}/inscrever")
@@ -105,6 +121,11 @@ public class CursoController {
                 DtoConverter.id(id),
                 requisicao.codigoAcesso()
         );
-        return DtoConverter.curso(curso, servicoModulo.listarPorCurso(curso.id()), false);
+        return DtoConverter.curso(
+                curso,
+                servicoModulo.listarPorCurso(curso.id()),
+                false,
+                servicoCurso.mapaNomesMonitores()
+        );
     }
 }

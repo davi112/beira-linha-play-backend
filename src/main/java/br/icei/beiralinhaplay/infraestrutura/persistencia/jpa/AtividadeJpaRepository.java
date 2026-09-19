@@ -10,10 +10,10 @@ import java.util.UUID;
 
 public interface AtividadeJpaRepository extends JpaRepository<AtividadeEntity, UUID> {
 
-    @EntityGraph(attributePaths = {"questoes", "modulo"})
+    @EntityGraph(attributePaths = {"questoes", "questoes.alternativas", "modulo"})
     List<AtividadeEntity> findByModuloIdOrderByIdAsc(UUID moduloId);
 
-    @EntityGraph(attributePaths = {"questoes", "modulo"})
+    @EntityGraph(attributePaths = {"questoes", "questoes.alternativas", "modulo"})
     @Query("select a from AtividadeEntity a where a.id = :id")
     Optional<AtividadeEntity> buscarCompleto(UUID id);
 }

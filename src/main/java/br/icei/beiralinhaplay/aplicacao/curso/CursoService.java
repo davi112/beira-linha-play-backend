@@ -6,12 +6,15 @@ import br.icei.beiralinhaplay.dominio.compartilhado.BusinessRuleException;
 import br.icei.beiralinhaplay.dominio.curso.Curso;
 import br.icei.beiralinhaplay.dominio.curso.CursoRepository;
 import br.icei.beiralinhaplay.dominio.usuario.Aluno;
+import br.icei.beiralinhaplay.dominio.usuario.Monitor;
 import br.icei.beiralinhaplay.dominio.usuario.UsuarioRepository;
 import br.icei.beiralinhaplay.dominio.usuario.TipoUsuario;
 import br.icei.beiralinhaplay.dominio.usuario.Usuario;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class CursoService {
 
@@ -89,6 +92,11 @@ public class CursoService {
         aluno.adicionarCurso(curso.id());
         repositorioUsuario.salvar(aluno);
         return curso;
+    }
+
+    public Map<UUID, String> mapaNomesMonitores() {
+        return repositorioUsuario.listarMonitores().stream()
+                .collect(Collectors.toMap(Monitor::id, Monitor::nome, (atual, ignorado) -> atual));
     }
 
     private void validarMonitores(List<UUID> monitorIds) {

@@ -57,9 +57,7 @@ public class TentativaRepositoryAdapter implements TentativaRepository {
             jpa.getRespostas().add(respostaJpa);
         }
         TentativaEntity salvo = tentativaJpaRepository.save(jpa);
-        return tentativaJpaRepository.buscarCompleto(salvo.getId())
-                .map(TentativaRepositoryAdapter::paraDominio)
-                .orElseThrow();
+        return paraDominioPreservandoCorrecao(salvo, tentativa);
     }
 
     @Override
@@ -93,6 +91,30 @@ public class TentativaRepositoryAdapter implements TentativaRepository {
     @Transactional(readOnly = true)
     public Optional<Tentativa> buscarPorId(UUID id) {
         return tentativaJpaRepository.buscarCompleto(id).map(TentativaRepositoryAdapter::paraDominio);
+    }
+
+    private static Tentativa paraDominioPreservandoCorrecao(
+            TentativaEntity jpa,
+            Tentativa original
+    ) {
+        var corretaPorQuestao = original.respostas().stream()
+                .collect(java.util.stream.Collectors.toMap(Resposta::questaoId, Resposta::correta));
+        List<Resposta> respostas = jpa.getRespostas().stream()
+                .map(r -> new Resposta(
+                        r.getId(),
+                        corretaPorQuestao.getOrDefault(r.getQuestao().getId(), r.isCorreta()),
+                        r.getQuestao().getId(),
+                        r.getAlternativa().getId()
+                ))
+                .toList();
+        return new Tentativa(
+                jpa.getId(),
+                jpa.getDataEnvio(),
+                original.pontuacaoObtida(),
+                jpa.getAluno().getId(),
+                jpa.getAtividade().getId(),
+                respostas
+        );
     }
 
     private static Tentativa paraDominio(TentativaEntity jpa) {

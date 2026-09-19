@@ -134,11 +134,25 @@ public final class DtoConverter {
     }
 
     public static CursoResponse curso(Curso curso, List<Modulo> modulos, boolean incluirCodigo) {
+        return curso(curso, modulos, incluirCodigo, Map.of());
+    }
+
+    public static CursoResponse curso(
+            Curso curso,
+            List<Modulo> modulos,
+            boolean incluirCodigo,
+            Map<UUID, String> nomesMonitores
+    ) {
+        List<String> nomes = curso.monitorIds().stream()
+                .map(nomesMonitores::get)
+                .filter(nome -> nome != null && !nome.isBlank())
+                .toList();
         return new CursoResponse(
                 id(curso.id()),
                 curso.nome(),
                 incluirCodigo ? curso.codigoAcesso() : null,
                 curso.monitorIds().stream().map(DtoConverter::id).toList(),
+                nomes,
                 modulos.stream()
                         .map(m -> new CursoResponse.ModuloResumo(id(m.id()), m.nome(), id(m.cursoId())))
                         .toList()
@@ -151,7 +165,13 @@ public final class DtoConverter {
                 modulo.nome(),
                 id(modulo.cursoId()),
                 atividades.stream()
-                        .map(a -> new ModuloResponse.AtividadeResumo(id(a.id()), a.titulo(), a.quantQuestoes(), id(a.moduloId())))
+                        .map(a -> new ModuloResponse.AtividadeResumo(
+                                id(a.id()),
+                                a.titulo(),
+                                a.quantQuestoes(),
+                                id(a.moduloId()),
+                                a.xpTotal()
+                        ))
                         .toList()
         );
     }
