@@ -10,6 +10,11 @@ public record CursoResponse(
         List<String> monitorNomes,
         List<ModuloResumo> modulos
 ) {
-    public record ModuloResumo(String id, String nome, String cursoId) {
+    public record ModuloResumo(
+            String id,
+            String nome,
+            String cursoId,
+            List<ModuloResponse.AtividadeResumo> atividades
+    ) {
     }
 }

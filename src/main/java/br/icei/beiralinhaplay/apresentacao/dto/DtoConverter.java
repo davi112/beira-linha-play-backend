@@ -134,7 +134,7 @@ public final class DtoConverter {
     }
 
     public static CursoResponse curso(Curso curso, List<Modulo> modulos, boolean incluirCodigo) {
-        return curso(curso, modulos, incluirCodigo, Map.of());
+        return curso(curso, modulos, incluirCodigo, Map.of(), Map.of());
     }
 
     public static CursoResponse curso(
@@ -142,6 +142,16 @@ public final class DtoConverter {
             List<Modulo> modulos,
             boolean incluirCodigo,
             Map<UUID, String> nomesMonitores
+    ) {
+        return curso(curso, modulos, incluirCodigo, nomesMonitores, Map.of());
+    }
+
+    public static CursoResponse curso(
+            Curso curso,
+            List<Modulo> modulos,
+            boolean incluirCodigo,
+            Map<UUID, String> nomesMonitores,
+            Map<UUID, List<Atividade>> atividadesPorModulo
     ) {
         List<String> nomes = curso.monitorIds().stream()
                 .map(nomesMonitores::get)
@@ -154,7 +164,20 @@ public final class DtoConverter {
                 curso.monitorIds().stream().map(DtoConverter::id).toList(),
                 nomes,
                 modulos.stream()
-                        .map(m -> new CursoResponse.ModuloResumo(id(m.id()), m.nome(), id(m.cursoId())))
+                        .map(m -> new CursoResponse.ModuloResumo(
+                                id(m.id()),
+                                m.nome(),
+                                id(m.cursoId()),
+                                atividadesPorModulo.getOrDefault(m.id(), List.of()).stream()
+                                        .map(a -> new ModuloResponse.AtividadeResumo(
+                                                id(a.id()),
+                                                a.titulo(),
+                                                a.quantQuestoes(),
+                                                id(a.moduloId()),
+                                                a.xpTotal()
+                                        ))
+                                        .toList()
+                        ))
                         .toList()
         );
     }
