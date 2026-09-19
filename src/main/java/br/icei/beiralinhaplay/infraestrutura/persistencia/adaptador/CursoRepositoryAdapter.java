@@ -51,6 +51,16 @@ public class CursoRepositoryAdapter implements CursoRepository {
 
     @Override
     @Transactional(readOnly = true)
+    public Optional<Curso> buscarPorCodigoAcesso(String codigo) {
+        if (codigo == null || codigo.isBlank()) {
+            return Optional.empty();
+        }
+        return cursoJpaRepository.findByCodigoAcessoIgnoreCase(codigo.trim())
+                .map(ConteudoMapper::paraDominio);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Curso> listar() {
         return cursoJpaRepository.findAllComRelacoes().stream().map(ConteudoMapper::paraDominio).toList();
     }

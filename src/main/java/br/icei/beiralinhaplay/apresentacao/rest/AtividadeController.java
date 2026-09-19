@@ -50,7 +50,10 @@ public class AtividadeController {
     public AtividadeResponse buscar(@PathVariable String id, Authentication authentication) {
         Usuario usuario = AuthHttp.usuario(authentication);
         boolean gabarito = usuario.tipo() != TipoUsuario.ALUNO;
-        return DtoConverter.atividade(servicoAtividade.buscar(DtoConverter.id(id)), gabarito);
+        return DtoConverter.atividade(
+                servicoAtividade.buscar(usuario, DtoConverter.id(id)),
+                gabarito
+        );
     }
 
     @PatchMapping("/api/atividades/{id}")

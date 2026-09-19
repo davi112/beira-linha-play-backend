@@ -55,8 +55,8 @@ public class ModuloController {
     }
 
     @GetMapping("/api/modulos/{id}")
-    public ModuloResponse buscar(@PathVariable String id) {
-        var modulo = servicoModulo.buscar(DtoConverter.id(id));
+    public ModuloResponse buscar(@PathVariable String id, Authentication authentication) {
+        var modulo = servicoModulo.buscar(AuthHttp.usuario(authentication), DtoConverter.id(id));
         return DtoConverter.modulo(modulo, servicoAtividade.listarPorModulo(modulo.id()));
     }
 

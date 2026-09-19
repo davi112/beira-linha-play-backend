@@ -21,4 +21,7 @@ public interface CursoJpaRepository extends JpaRepository<CursoEntity, UUID> {
     boolean existsByCodigoAcessoIgnoreCaseAndIdNot(String codigo, UUID id);
 
     boolean existsByCodigoAcessoIgnoreCase(String codigo);
+
+    @EntityGraph(attributePaths = {"monitores", "modulos"})
+    Optional<CursoEntity> findByCodigoAcessoIgnoreCase(String codigo);
 }

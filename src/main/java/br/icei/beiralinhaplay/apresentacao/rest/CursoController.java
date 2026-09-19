@@ -39,7 +39,7 @@ public class CursoController {
     public List<CursoResponse> listar(Authentication authentication) {
         Usuario usuario = AuthHttp.usuario(authentication);
         boolean codigo = usuario.tipo() != TipoUsuario.ALUNO;
-        return servicoCurso.listar().stream()
+        return servicoCurso.listar(usuario).stream()
                 .map(curso -> DtoConverter.curso(curso, servicoModulo.listarPorCurso(curso.id()), codigo))
                 .toList();
     }
@@ -47,7 +47,7 @@ public class CursoController {
     @GetMapping("/{id}")
     public CursoResponse buscar(@PathVariable String id, Authentication authentication) {
         Usuario usuario = AuthHttp.usuario(authentication);
-        var curso = servicoCurso.buscar(DtoConverter.id(id));
+        var curso = servicoCurso.buscar(usuario, DtoConverter.id(id));
         boolean codigo = usuario.tipo() != TipoUsuario.ALUNO;
         return DtoConverter.curso(curso, servicoModulo.listarPorCurso(curso.id()), codigo);
     }
@@ -80,6 +80,18 @@ public class CursoController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void excluir(@PathVariable String id, Authentication authentication) {
         servicoCurso.excluir(AuthHttp.usuario(authentication), DtoConverter.id(id));
+    }
+
+    @PostMapping("/inscrever")
+    public CursoResponse inscreverPorCodigo(
+            Authentication authentication,
+            @Valid @RequestBody InscreverCursoRequest requisicao
+    ) {
+        var curso = servicoCurso.inscreverPorCodigo(
+                AuthHttp.usuario(authentication),
+                requisicao.codigoAcesso()
+        );
+        return DtoConverter.curso(curso, servicoModulo.listarPorCurso(curso.id()), false);
     }
 
     @PostMapping("/{id}/inscrever")

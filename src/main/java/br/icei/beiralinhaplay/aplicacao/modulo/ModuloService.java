@@ -1,5 +1,6 @@
 package br.icei.beiralinhaplay.aplicacao.modulo;
 
+import br.icei.beiralinhaplay.aplicacao.curso.AcessoCurso;
 import br.icei.beiralinhaplay.dominio.atividade.AtividadeRepository;
 import br.icei.beiralinhaplay.dominio.compartilhado.ForbiddenException;
 import br.icei.beiralinhaplay.dominio.compartilhado.ResourceNotFoundException;
@@ -37,6 +38,14 @@ public class ModuloService {
     public Modulo buscar(UUID id) {
         return repositorioModulo.buscarPorId(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Módulo não encontrado"));
+    }
+
+    public Modulo buscar(Usuario solicitante, UUID id) {
+        Modulo modulo = buscar(id);
+        Curso curso = repositorioCurso.buscarPorId(modulo.cursoId())
+                .orElseThrow(() -> new ResourceNotFoundException("Curso não encontrado"));
+        AcessoCurso.exigirLeitura(solicitante, curso);
+        return modulo;
     }
 
     public Modulo criar(Usuario solicitante, UUID cursoId, SalvarModuloCommand comando) {

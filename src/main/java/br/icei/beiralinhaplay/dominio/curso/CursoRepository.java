@@ -10,6 +10,8 @@ public interface CursoRepository {
 
     Optional<Curso> buscarPorId(UUID id);
 
+    Optional<Curso> buscarPorCodigoAcesso(String codigo);
+
     List<Curso> listar();
 
     void excluir(UUID id);

@@ -1,5 +1,6 @@
 package br.icei.beiralinhaplay.aplicacao.atividade;
 
+import br.icei.beiralinhaplay.aplicacao.curso.AcessoCurso;
 import br.icei.beiralinhaplay.dominio.alternativa.Alternativa;
 import br.icei.beiralinhaplay.dominio.atividade.Atividade;
 import br.icei.beiralinhaplay.dominio.atividade.AtividadeRepository;
@@ -40,6 +41,12 @@ public class AtividadeService {
     public Atividade buscar(UUID id) {
         return repositorioAtividade.buscarPorId(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Atividade não encontrada"));
+    }
+
+    public Atividade buscar(Usuario solicitante, UUID id) {
+        Atividade atividade = buscar(id);
+        AcessoCurso.exigirLeitura(solicitante, cursoDaAtividade(atividade));
+        return atividade;
     }
 
     public Atividade criar(Usuario solicitante, UUID moduloId, SalvarAtividadeCommand comando) {
@@ -85,6 +92,11 @@ public class AtividadeService {
     private Modulo modulo(UUID moduloId) {
         return repositorioModulo.buscarPorId(moduloId)
                 .orElseThrow(() -> new ResourceNotFoundException("Módulo não encontrado"));
+    }
+
+    private Curso cursoDaAtividade(Atividade atividade) {
+        return repositorioCurso.buscarPorId(modulo(atividade.moduloId()).cursoId())
+                .orElseThrow(() -> new ResourceNotFoundException("Curso não encontrado"));
     }
 
     private void exigirMonitorDoCurso(Usuario solicitante, UUID cursoId) {

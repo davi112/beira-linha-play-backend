@@ -165,6 +165,11 @@ class GeracaoQuestoesServiceTest {
         }
 
         @Override
+        public Optional<Curso> buscarPorCodigoAcesso(String codigo) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public List<Curso> listar() {
             throw new UnsupportedOperationException();
         }
