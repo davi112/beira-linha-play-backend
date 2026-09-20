@@ -21,7 +21,7 @@ docker compose up -d
 ./mvnw spring-boot:run
 ```
 
-A API fica em `http://localhost:8080`. O frontend Vite deve usar `credentials: 'include'` e origem `http://localhost:5173` (já configurada em `app.allowed-hosts`).
+A API fica em `http://localhost:8080`. Com `npm run dev`, defina `APP_ALLOWED_HOSTS` no `.env` com as origens do Vite (ex.: `http://localhost:5173,http://SEU_IP:5173`). Sem valor, nenhuma origem CORS é liberada.
 
 ### Usuários de demonstração (senha `123456`)
 

@@ -2,20 +2,34 @@ package br.icei.beiralinhaplay.infraestrutura.configuracao;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @ConfigurationProperties(prefix = "app")
 public class ApplicationProperties {
 
-    private String allowedHosts = "http://localhost:5173";
+    private List<String> allowedHosts = new ArrayList<>();
     private Jwt jwt = new Jwt();
     private Cookie cookie = new Cookie();
     private Gemini gemini = new Gemini();
 
-    public String getAllowedHosts() {
+    public List<String> getAllowedHosts() {
         return allowedHosts;
     }
 
-    public void setAllowedHosts(String allowedHosts) {
-        this.allowedHosts = allowedHosts;
+    public void setAllowedHosts(List<String> allowedHosts) {
+        this.allowedHosts = allowedHosts == null ? new ArrayList<>() : allowedHosts;
+    }
+
+    public List<String> origensCors() {
+        return allowedHosts.stream()
+                .flatMap(valor -> Arrays.stream(valor.split("[,;]+")))
+                .map(String::trim)
+                .map(origem -> origem.replaceAll("^['\"]|['\"]$", ""))
+                .filter(origem -> !origem.isEmpty())
+                .distinct()
+                .toList();
     }
 
     public Jwt getJwt() {
