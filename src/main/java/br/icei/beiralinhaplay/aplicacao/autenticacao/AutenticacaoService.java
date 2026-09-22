@@ -9,7 +9,6 @@ import br.icei.beiralinhaplay.dominio.compartilhado.InvalidCredentialsException;
 import br.icei.beiralinhaplay.dominio.compartilhado.ResourceNotFoundException;
 import br.icei.beiralinhaplay.dominio.compartilhado.BusinessRuleException;
 import br.icei.beiralinhaplay.dominio.compartilhado.DomainRules;
-import br.icei.beiralinhaplay.dominio.usuario.Admin;
 import br.icei.beiralinhaplay.dominio.usuario.Aluno;
 import br.icei.beiralinhaplay.dominio.usuario.Monitor;
 import br.icei.beiralinhaplay.dominio.usuario.UsuarioRepository;
@@ -55,7 +54,7 @@ public class AutenticacaoService {
         if (!codificadorSenha.confere(comando.senha(), usuario.senhaHash())) {
             throw new InvalidCredentialsException(mensagemCredencial(comando.tipo()));
         }
-        return emitirSessao(usuario);
+        return criarToken(usuario);
     }
 
     public AutenticacaoResult registrar(RegistrarCommand comando) {
@@ -65,15 +64,15 @@ public class AutenticacaoService {
             case MONITOR -> registrarMonitor(comando);
             case ADMIN -> throw new BusinessRuleException("Admin não pode se cadastrar por esta rota");
         };
-        return emitirSessao(criado);
+        return criarToken(criado);
     }
 
-    public AutenticacaoResult renovar(String tokenOpaco) {
-        if (tokenOpaco == null || tokenOpaco.isBlank()) {
+    public AutenticacaoResult renovar(String token) {
+        if (token == null || token.isBlank()) {
             throw new InvalidCredentialsException("Sessão expirada");
         }
         Instant agora = Instant.now(relogio);
-        String hash = geradorTokenAtualizacao.hash(tokenOpaco);
+        String hash = geradorTokenAtualizacao.hash(token);
         TokenAtualizacao atual = repositorioTokenAtualizacao.buscarPorHash(hash)
                 .orElseThrow(() -> new InvalidCredentialsException("Sessão expirada"));
 
@@ -87,7 +86,7 @@ public class AutenticacaoService {
 
         Usuario usuario = repositorioUsuario.buscarPorId(atual.usuarioId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
-        return emitirSessao(usuario);
+        return criarToken(usuario);
     }
 
     public void encerrar(String tokenOpaco) {
@@ -102,12 +101,7 @@ public class AutenticacaoService {
                 });
     }
 
-    public Usuario usuarioAutenticado(UUID usuarioId) {
-        return repositorioUsuario.buscarPorId(usuarioId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
-    }
-
-    private AutenticacaoResult emitirSessao(Usuario usuario) {
+    private AutenticacaoResult criarToken(Usuario usuario) {
         Instant agora = Instant.now(relogio);
         String opaco = geradorTokenAtualizacao.gerarTokenOpaco();
         TokenAtualizacao persistido = new TokenAtualizacao(

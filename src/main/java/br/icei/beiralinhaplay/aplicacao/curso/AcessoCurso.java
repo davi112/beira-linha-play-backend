@@ -7,8 +7,7 @@ import br.icei.beiralinhaplay.dominio.usuario.Usuario;
 
 public final class AcessoCurso {
 
-    private AcessoCurso() {
-    }
+    private AcessoCurso() {}
 
     public static boolean visivelNaLista(Usuario usuario, Curso curso) {
         if (usuario.tipo() == TipoUsuario.ADMIN) {

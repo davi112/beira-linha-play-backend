@@ -2,10 +2,10 @@ package br.icei.beiralinhaplay.infraestrutura.persistencia.adaptador;
 
 import br.icei.beiralinhaplay.dominio.curso.Curso;
 import br.icei.beiralinhaplay.dominio.curso.CursoRepository;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.CursoEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.CursoJpaRepository;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.MonitorEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.MonitorJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.CursoEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.CursoJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.MonitorEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.MonitorJpaRepository;
 import br.icei.beiralinhaplay.infraestrutura.persistencia.mapeamento.ConteudoMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;

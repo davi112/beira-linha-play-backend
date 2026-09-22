@@ -5,12 +5,12 @@ import br.icei.beiralinhaplay.dominio.atividade.Atividade;
 import br.icei.beiralinhaplay.dominio.curso.Curso;
 import br.icei.beiralinhaplay.dominio.modulo.Modulo;
 import br.icei.beiralinhaplay.dominio.questao.Questao;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.AlternativaEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.AtividadeEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.CursoEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.ModuloEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.MonitorEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.QuestaoEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.AlternativaEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.AtividadeEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.CursoEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.ModuloEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.MonitorEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.QuestaoEntity;
 
 import java.util.List;
 import java.util.UUID;

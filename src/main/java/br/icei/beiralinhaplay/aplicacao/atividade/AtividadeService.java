@@ -39,8 +39,7 @@ public class AtividadeService {
     }
 
     public Atividade buscar(UUID id) {
-        return repositorioAtividade.buscarPorId(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Atividade não encontrada"));
+        return repositorioAtividade.buscarPorId(id).orElseThrow(() -> new ResourceNotFoundException("Atividade não encontrada"));
     }
 
     public Atividade buscar(Usuario solicitante, UUID id) {
@@ -81,30 +80,26 @@ public class AtividadeService {
                         null,
                         q.enunciado(),
                         q.valor(),
-                        q.alternativas().stream()
-                                .map(a -> new Alternativa(null, a.descricao(), a.correta()))
-                                .toList()
+                        q.alternativas().stream().map(a ->
+                                new Alternativa(null, a.descricao(), a.correta())
+                        ).toList()
                 ))
                 .toList();
+
         return new Atividade(id, comando.titulo(), moduloId, questoes);
     }
 
     private Modulo modulo(UUID moduloId) {
-        return repositorioModulo.buscarPorId(moduloId)
-                .orElseThrow(() -> new ResourceNotFoundException("Módulo não encontrado"));
+        return repositorioModulo.buscarPorId(moduloId) .orElseThrow(() -> new ResourceNotFoundException("Módulo não encontrado"));
     }
 
     private Curso cursoDaAtividade(Atividade atividade) {
-        return repositorioCurso.buscarPorId(modulo(atividade.moduloId()).cursoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Curso não encontrado"));
+        return repositorioCurso.buscarPorId(modulo(atividade.moduloId()).cursoId()).orElseThrow(() -> new ResourceNotFoundException("Curso não encontrado"));
     }
 
     private void exigirMonitorDoCurso(Usuario solicitante, UUID cursoId) {
-        if (solicitante.tipo() == TipoUsuario.ADMIN) {
-            return;
-        }
-        Curso curso = repositorioCurso.buscarPorId(cursoId)
-                .orElseThrow(() -> new ResourceNotFoundException("Curso não encontrado"));
+        Curso curso = repositorioCurso.buscarPorId(cursoId).orElseThrow(() -> new ResourceNotFoundException("Curso não encontrado"));
+
         if (solicitante.tipo() != TipoUsuario.MONITOR || !curso.monitorIds().contains(solicitante.id())) {
             throw new ForbiddenException("Apenas o monitor do curso pode alterar atividades");
         }

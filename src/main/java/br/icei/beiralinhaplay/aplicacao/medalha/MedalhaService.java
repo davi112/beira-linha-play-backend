@@ -10,6 +10,7 @@ import br.icei.beiralinhaplay.dominio.usuario.UsuarioRepository;
 import br.icei.beiralinhaplay.dominio.usuario.TipoUsuario;
 import br.icei.beiralinhaplay.dominio.usuario.Usuario;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +28,12 @@ public class MedalhaService {
         Integer pontos = solicitante instanceof Aluno aluno ? aluno.pontos() : null;
         return repositorioMedalha.listar().stream()
                 .map(medalha -> new MedalhaComStatus(medalha, pontos != null && pontos >= medalha.pontosMin()))
+                .sorted(new Comparator<MedalhaComStatus>() {
+                    @Override
+                    public int compare(MedalhaComStatus o1, MedalhaComStatus o2) {
+                        return Integer.compare(o1.medalha().pontosMin(), o2.medalha().pontosMin());
+                    }
+                })
                 .toList();
     }
 
@@ -44,7 +51,7 @@ public class MedalhaService {
 
     public Aluno equiparAvatar(Usuario solicitante, UUID medalhaId) {
         if (!(solicitante instanceof Aluno aluno)) {
-            throw new ForbiddenException("Apenas alunos equipam medalha como avatar");
+            throw new ForbiddenException("Apenas alunos equipam medalha como foto de pergil");
         }
         Medalha medalha = repositorioMedalha.buscarPorId(medalhaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Medalha não encontrada"));

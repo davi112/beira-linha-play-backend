@@ -2,8 +2,8 @@ package br.icei.beiralinhaplay.infraestrutura.persistencia.adaptador;
 
 import br.icei.beiralinhaplay.dominio.medalha.Medalha;
 import br.icei.beiralinhaplay.dominio.medalha.MedalhaRepository;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.MedalhaEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.MedalhaJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.MedalhaEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.MedalhaJpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 

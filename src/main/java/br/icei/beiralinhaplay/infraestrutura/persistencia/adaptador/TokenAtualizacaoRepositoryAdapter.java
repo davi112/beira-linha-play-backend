@@ -2,9 +2,9 @@ package br.icei.beiralinhaplay.infraestrutura.persistencia.adaptador;
 
 import br.icei.beiralinhaplay.dominio.autenticacao.TokenAtualizacaoRepository;
 import br.icei.beiralinhaplay.dominio.autenticacao.TokenAtualizacao;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.TokenAtualizacaoEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.TokenAtualizacaoJpaRepository;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.UsuarioJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.TokenAtualizacaoEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.TokenAtualizacaoJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.UsuarioJpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 

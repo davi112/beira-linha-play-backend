@@ -4,11 +4,11 @@ import br.icei.beiralinhaplay.dominio.usuario.Admin;
 import br.icei.beiralinhaplay.dominio.usuario.Aluno;
 import br.icei.beiralinhaplay.dominio.usuario.Monitor;
 import br.icei.beiralinhaplay.dominio.usuario.Usuario;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.AdminEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.AlunoEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.CursoEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.MonitorEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.UsuarioEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.AdminEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.AlunoEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.CursoEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.MonitorEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.UsuarioEntity;
 
 import java.util.List;
 import java.util.UUID;

@@ -77,9 +77,6 @@ public class ModuloService {
     }
 
     private static void exigirMonitorDoCurso(Usuario solicitante, Curso curso) {
-        if (solicitante.tipo() == TipoUsuario.ADMIN) {
-            return;
-        }
         if (solicitante.tipo() != TipoUsuario.MONITOR || !curso.monitorIds().contains(solicitante.id())) {
             throw new ForbiddenException("Apenas o monitor do curso pode alterar módulos");
         }
