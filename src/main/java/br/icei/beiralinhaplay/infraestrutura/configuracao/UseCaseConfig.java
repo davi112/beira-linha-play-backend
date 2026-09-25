@@ -5,6 +5,7 @@ import br.icei.beiralinhaplay.aplicacao.autenticacao.AutenticacaoService;
 import br.icei.beiralinhaplay.aplicacao.curso.CursoService;
 import br.icei.beiralinhaplay.aplicacao.questoes.GeracaoQuestoesService;
 import br.icei.beiralinhaplay.aplicacao.questoes.GeradorQuestoes;
+import br.icei.beiralinhaplay.aplicacao.medalha.ArmazenamentoImagem;
 import br.icei.beiralinhaplay.aplicacao.medalha.MedalhaService;
 import br.icei.beiralinhaplay.aplicacao.modulo.ModuloService;
 import br.icei.beiralinhaplay.aplicacao.ranking.RankingService;
@@ -122,7 +123,11 @@ public class UseCaseConfig {
     }
 
     @Bean
-    MedalhaService servicoMedalha(MedalhaRepository repositorioMedalha, UsuarioRepository repositorioUsuario) {
-        return new MedalhaService(repositorioMedalha, repositorioUsuario);
+    MedalhaService servicoMedalha(
+            MedalhaRepository repositorioMedalha,
+            UsuarioRepository repositorioUsuario,
+            ArmazenamentoImagem armazenamentoImagem
+    ) {
+        return new MedalhaService(repositorioMedalha, repositorioUsuario, armazenamentoImagem);
     }
 }

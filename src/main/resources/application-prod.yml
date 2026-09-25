@@ -1,0 +1,38 @@
+# Ativado na VPS por SPRING_PROFILES_ACTIVE=prod (docker-compose.prod.yml).
+
+debug: false
+
+spring:
+  jpa:
+    show-sql: false
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: false
+        generate_statistics: false
+  output:
+    ansi:
+      enabled: never
+
+server:
+  error:
+    include-exception: false
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+  forward-headers-strategy: framework
+
+logging:
+  level:
+    root: INFO
+    org.springframework: WARN
+    org.springframework.web: INFO
+    org.springframework.security: WARN
+    org.hibernate: WARN
+    org.hibernate.SQL: "OFF"
+    org.hibernate.orm.jdbc.bind: "OFF"
+    org.hibernate.type.descriptor.sql.BasicBinder: "OFF"
+    org.flywaydb: INFO
+    br.icei.beiralinhaplay: INFO

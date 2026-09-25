@@ -13,6 +13,7 @@ public class ApplicationProperties {
     private Jwt jwt = new Jwt();
     private Cookie cookie = new Cookie();
     private Gemini gemini = new Gemini();
+    private Cloudinary cloudinary = new Cloudinary();
 
     public List<String> getAllowedHosts() {
         return allowedHosts;
@@ -54,6 +55,14 @@ public class ApplicationProperties {
 
     public void setGemini(Gemini gemini) {
         this.gemini = gemini;
+    }
+
+    public Cloudinary getCloudinary() {
+        return cloudinary;
+    }
+
+    public void setCloudinary(Cloudinary cloudinary) {
+        this.cloudinary = cloudinary == null ? new Cloudinary() : cloudinary;
     }
 
     public static class Jwt {
@@ -143,6 +152,45 @@ public class ApplicationProperties {
 
         public void setModel(String model) {
             this.model = model;
+        }
+    }
+
+    public static class Cloudinary {
+        private String cloudName = "";
+        private String apiKey = "";
+        private String apiSecret = "";
+        private String folder = "medalhas";
+
+        public String getCloudName() {
+            return cloudName;
+        }
+
+        public void setCloudName(String cloudName) {
+            this.cloudName = cloudName == null ? "" : cloudName;
+        }
+
+        public String getApiKey() {
+            return apiKey;
+        }
+
+        public void setApiKey(String apiKey) {
+            this.apiKey = apiKey == null ? "" : apiKey;
+        }
+
+        public String getApiSecret() {
+            return apiSecret;
+        }
+
+        public void setApiSecret(String apiSecret) {
+            this.apiSecret = apiSecret == null ? "" : apiSecret;
+        }
+
+        public String getFolder() {
+            return folder;
+        }
+
+        public void setFolder(String folder) {
+            this.folder = folder == null ? "" : folder;
         }
     }
 }

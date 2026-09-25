@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -58,6 +60,16 @@ public class GlobalExceptionHandler {
                 .map(error -> error.getDefaultMessage())
                 .orElse("Dados inválidos");
         return erro(HttpStatus.BAD_REQUEST, mensagem);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> arquivoGrande(MaxUploadSizeExceededException ex) {
+        return erro(HttpStatus.PAYLOAD_TOO_LARGE, "A imagem deve ter no máximo 2 MB");
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ErrorResponse> parteFaltando(MissingServletRequestPartException ex) {
+        return erro(HttpStatus.BAD_REQUEST, "Informe a imagem da medalha");
     }
 
     private static ResponseEntity<ErrorResponse> erro(HttpStatus status, String mensagem) {

@@ -6,7 +6,6 @@ import br.icei.beiralinhaplay.aplicacao.autenticacao.RegistrarCommand;
 import br.icei.beiralinhaplay.aplicacao.curso.SalvarCursoCommand;
 import br.icei.beiralinhaplay.aplicacao.questoes.GerarQuestoesCommand;
 import br.icei.beiralinhaplay.aplicacao.questoes.QuestaoGerada;
-import br.icei.beiralinhaplay.aplicacao.medalha.SalvarMedalhaCommand;
 import br.icei.beiralinhaplay.aplicacao.medalha.MedalhaComStatus;
 import br.icei.beiralinhaplay.aplicacao.modulo.SalvarModuloCommand;
 import br.icei.beiralinhaplay.aplicacao.ranking.RankingPosition;
@@ -107,10 +106,6 @@ public final class DtoConverter {
         Map<UUID, UUID> mapa = req.respostas().stream()
                 .collect(Collectors.toMap(r -> id(r.questaoId()), r -> id(r.alternativaId())));
         return new EnviarTentativaCommand(mapa);
-    }
-
-    public static SalvarMedalhaCommand comando(SalvarMedalhaRequest req) {
-        return new SalvarMedalhaCommand(req.nome(), req.imagemUrl(), req.pontosMin());
     }
 
     public static UsuarioResponse usuario(Usuario usuario) {
