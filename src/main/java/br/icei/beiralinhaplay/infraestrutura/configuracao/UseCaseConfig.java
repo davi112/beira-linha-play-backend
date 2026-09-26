@@ -11,6 +11,7 @@ import br.icei.beiralinhaplay.aplicacao.modulo.ModuloService;
 import br.icei.beiralinhaplay.aplicacao.ranking.RankingService;
 import br.icei.beiralinhaplay.aplicacao.tentativa.TentativaService;
 import br.icei.beiralinhaplay.aplicacao.usuario.ContaService;
+import br.icei.beiralinhaplay.aplicacao.usuario.ImportarInscritosService;
 import br.icei.beiralinhaplay.dominio.atividade.AtividadeRepository;
 import br.icei.beiralinhaplay.dominio.autenticacao.PasswordHasher;
 import br.icei.beiralinhaplay.dominio.autenticacao.RefreshTokenGenerator;
@@ -21,6 +22,7 @@ import br.icei.beiralinhaplay.dominio.medalha.MedalhaRepository;
 import br.icei.beiralinhaplay.dominio.modulo.ModuloRepository;
 import br.icei.beiralinhaplay.dominio.tentativa.TentativaRepository;
 import br.icei.beiralinhaplay.dominio.usuario.UsuarioRepository;
+import br.icei.beiralinhaplay.infraestrutura.integracoes.sympla.ImportadorParticipantesSympla;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -87,6 +89,13 @@ public class UseCaseConfig {
             GeradorQuestoes geradorQuestoes
     ) {
         return new GeracaoQuestoesService(repositorioModulo, repositorioCurso, geradorQuestoes);
+    }
+
+    @Bean
+    ImportarInscritosService importarInscritosService(
+            ImportadorParticipantesSympla importadorParticipantes
+    ){
+        return new ImportarInscritosService(importadorParticipantes);
     }
 
     @Bean

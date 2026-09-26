@@ -14,6 +14,7 @@ public class ApplicationProperties {
     private Cookie cookie = new Cookie();
     private Gemini gemini = new Gemini();
     private Cloudinary cloudinary = new Cloudinary();
+    private Sympla sympla = new Sympla();
 
     public List<String> getAllowedHosts() {
         return allowedHosts;
@@ -59,6 +60,14 @@ public class ApplicationProperties {
 
     public Cloudinary getCloudinary() {
         return cloudinary;
+    }
+
+    public Sympla getSympla() {
+        return sympla;
+    }
+
+    public void setSympla(Sympla sympla) {
+        this.sympla = sympla;
     }
 
     public void setCloudinary(Cloudinary cloudinary) {
@@ -191,6 +200,13 @@ public class ApplicationProperties {
 
         public void setFolder(String folder) {
             this.folder = folder == null ? "" : folder;
+        }
+    }
+
+    public static class Sympla{
+        private String token = "";
+        public String getToken() {
+            return token;
         }
     }
 }

@@ -1,15 +1,18 @@
 package br.icei.beiralinhaplay.apresentacao.rest;
 
 import br.icei.beiralinhaplay.aplicacao.usuario.ContaService;
+import br.icei.beiralinhaplay.aplicacao.usuario.ImportarInscritosService;
 import br.icei.beiralinhaplay.apresentacao.dto.DtoConverter;
 import br.icei.beiralinhaplay.apresentacao.dto.AtualizarContaRequest;
 import br.icei.beiralinhaplay.apresentacao.dto.CriarAdminRequest;
+import br.icei.beiralinhaplay.apresentacao.dto.ImportarInscritosRequest;
 import br.icei.beiralinhaplay.apresentacao.dto.UsuarioResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,9 +26,11 @@ import java.util.List;
 public class UsuarioController {
 
     private final ContaService servicoConta;
+    private final ImportarInscritosService importarInscritosService;
 
-    public UsuarioController(ContaService servicoConta) {
+    public UsuarioController(ContaService servicoConta, ImportarInscritosService importarInscritosService) {
         this.servicoConta = servicoConta;
+        this.importarInscritosService = importarInscritosService;
     }
 
     @PatchMapping("/usuarios/me")
@@ -52,6 +57,16 @@ public class UsuarioController {
     @GetMapping("/monitores")
     public List<UsuarioResponse> monitores(Authentication authentication) {
         return servicoConta.listarMonitores(AuthHttp.usuario(authentication))
+                .stream()
+                .map(DtoConverter::usuario)
+                .toList();
+    }
+
+    @PostMapping("/importacao/inscritos")
+    public List<UsuarioResponse> importarUsuarios(Authentication authentication, @Valid @RequestBody
+        ImportarInscritosRequest requisicao)
+    {
+        return importarInscritosService.importarInscritos(AuthHttp.usuario(authentication), requisicao.idEventoExterno())
                 .stream()
                 .map(DtoConverter::usuario)
                 .toList();
