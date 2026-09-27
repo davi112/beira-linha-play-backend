@@ -1,5 +1,3 @@
-debug: false
-
 spring:
   application:
     name: beira-linha-play-api
@@ -43,7 +41,7 @@ app:
     access-token-minutos: 15
     refresh-token-dias: 7
   cookie:
-    secure: ${APP_COOKIE_SECURE}
+    secure: true
     same-site: ${APP_COOKIE_SAME_SITE}
     access-name: blp_access
     refresh-name: blp_refresh
@@ -56,4 +54,5 @@ app:
     api-secret: ${CLOUDINARY_API_SECRET:}
     folder: ${CLOUDINARY_FOLDER:medalhas}
   sympla:
-    api-key: ${SYMPLA_API_KEY}
+    token: ${SYMPLA_API_KEY:}
+debug: true

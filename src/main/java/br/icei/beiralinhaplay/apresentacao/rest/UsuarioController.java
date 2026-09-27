@@ -5,13 +5,18 @@ import br.icei.beiralinhaplay.aplicacao.usuario.ImportarInscritosService;
 import br.icei.beiralinhaplay.apresentacao.dto.DtoConverter;
 import br.icei.beiralinhaplay.apresentacao.dto.AtualizarContaRequest;
 import br.icei.beiralinhaplay.apresentacao.dto.CriarAdminRequest;
+import br.icei.beiralinhaplay.apresentacao.dto.AlunoResumoResponse;
+import br.icei.beiralinhaplay.apresentacao.dto.EventoDisponivelResponse;
 import br.icei.beiralinhaplay.apresentacao.dto.ImportarInscritosRequest;
+import br.icei.beiralinhaplay.apresentacao.dto.LogImportacaoResponse;
 import br.icei.beiralinhaplay.apresentacao.dto.UsuarioResponse;
+import br.icei.beiralinhaplay.aplicacao.usuario.ImportarInscritosService.LogImportacaoConsulta;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -62,13 +67,61 @@ public class UsuarioController {
                 .toList();
     }
 
-    @PostMapping("/importacao/inscritos")
-    public List<UsuarioResponse> importarUsuarios(Authentication authentication, @Valid @RequestBody
-        ImportarInscritosRequest requisicao)
-    {
-        return importarInscritosService.importarInscritos(AuthHttp.usuario(authentication), requisicao.idEventoExterno())
+    @GetMapping("/importacao/eventos")
+    public List<EventoDisponivelResponse> listarEventos(
+            Authentication authentication,
+            @RequestParam int ano
+    ) {
+        return importarInscritosService.listarEventos(AuthHttp.usuario(authentication), ano)
                 .stream()
-                .map(DtoConverter::usuario)
+                .map(evento -> new EventoDisponivelResponse(
+                        evento.referencia(),
+                        evento.nome(),
+                        evento.inicio(),
+                        evento.fim()
+                ))
                 .toList();
+    }
+
+    @GetMapping("/importacao/logs")
+    public List<LogImportacaoResponse> listarLogs(Authentication authentication) {
+        return importarInscritosService.listarLogs(AuthHttp.usuario(authentication)).stream()
+                .map(UsuarioController::log)
+                .toList();
+    }
+
+    @GetMapping("/importacao/logs/{id}/alunos")
+    public List<AlunoResumoResponse> alunosDoLog(
+            @PathVariable String id,
+            Authentication authentication
+    ) {
+        return importarInscritosService
+                .listarAlunosDoLog(AuthHttp.usuario(authentication), DtoConverter.id(id))
+                .stream()
+                .map(aluno -> new AlunoResumoResponse(aluno.nome(), aluno.email(), aluno.apelido()))
+                .toList();
+    }
+
+    @PostMapping("/importacao/inscritos")
+    public LogImportacaoResponse importarUsuarios(
+            Authentication authentication,
+            @Valid @RequestBody ImportarInscritosRequest requisicao
+    ) {
+        return log(importarInscritosService.importarInscritos(
+                AuthHttp.usuario(authentication),
+                requisicao.referencia()
+        ));
+    }
+
+    private static LogImportacaoResponse log(LogImportacaoConsulta consulta) {
+        return new LogImportacaoResponse(
+                consulta.id().toString(),
+                consulta.nomeEvento(),
+                consulta.urlEvento(),
+                consulta.quantidadeAlunos(),
+                consulta.quantidadeCursos(),
+                consulta.dataImportacao(),
+                consulta.adminNome()
+        );
     }
 }

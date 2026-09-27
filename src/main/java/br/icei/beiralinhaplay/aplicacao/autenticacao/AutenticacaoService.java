@@ -18,6 +18,7 @@ import br.icei.beiralinhaplay.dominio.usuario.Usuario;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,6 +55,7 @@ public class AutenticacaoService {
         if (!codificadorSenha.confere(comando.senha(), usuario.senhaHash())) {
             throw new InvalidCredentialsException(mensagemCredencial(comando.tipo()));
         }
+        exigirAcesso(usuario);
         return criarToken(usuario);
     }
 
@@ -86,6 +88,7 @@ public class AutenticacaoService {
 
         Usuario usuario = repositorioUsuario.buscarPorId(atual.usuarioId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+        exigirAcesso(usuario);
         return criarToken(usuario);
     }
 
@@ -117,13 +120,38 @@ public class AutenticacaoService {
 
     private Usuario localizarParaLogin(AutenticarCommand comando) {
         return switch (comando.tipo()) {
-            case ALUNO -> repositorioUsuario.buscarAlunoPorApelido(comando.apelido())
-                    .orElseThrow(() -> new InvalidCredentialsException("Apelido ou senha inválidos"));
+            case ALUNO -> localizarAluno(comando);
             case MONITOR -> repositorioUsuario.buscarMonitorPorEmail(comando.email())
                     .orElseThrow(() -> new InvalidCredentialsException("E-mail ou senha inválidos"));
             case ADMIN -> repositorioUsuario.buscarAdminPorNome(comando.nome())
                     .orElseThrow(() -> new InvalidCredentialsException("Nome ou senha inválidos"));
         };
+    }
+
+    private Usuario localizarAluno(AutenticarCommand comando) {
+        String email = comando.email();
+        String apelido = comando.apelido();
+        if ((email == null || email.isBlank()) && apelido != null && apelido.contains("@")) {
+            email = apelido;
+            apelido = null;
+        }
+        if (email != null && !email.isBlank()) {
+            List<Usuario> comEmail = repositorioUsuario.listarPorEmail(email).stream()
+                    .filter(Aluno.class::isInstance)
+                    .toList();
+            if (comEmail.size() > 1) {
+                throw new InvalidCredentialsException("Este e-mail está em mais de uma conta. Entre com o apelido.");
+            }
+            if (comEmail.size() == 1) {
+                return comEmail.getFirst();
+            }
+            throw new InvalidCredentialsException("Apelido, e-mail ou senha inválidos");
+        }
+        if (apelido == null || apelido.isBlank()) {
+            throw new InvalidCredentialsException("Apelido, e-mail ou senha inválidos");
+        }
+        return repositorioUsuario.buscarAlunoPorApelido(apelido)
+                .orElseThrow(() -> new InvalidCredentialsException("Apelido, e-mail ou senha inválidos"));
     }
 
     private Aluno registrarAluno(RegistrarCommand comando) {
@@ -164,6 +192,12 @@ public class AutenticacaoService {
         return (Monitor) repositorioUsuario.salvar(monitor);
     }
 
+    private void exigirAcesso(Usuario usuario) {
+        if (usuario.acessoExpirado(LocalDate.now(relogio))) {
+            throw new InvalidCredentialsException("O acesso deste usuário expirou.");
+        }
+    }
+
     private static void validarSenha(String senha) {
         if (senha == null || senha.length() < DomainRules.SENHA_MINIMA) {
             throw new BusinessRuleException("A senha deve ter pelo menos 6 caracteres");
@@ -172,7 +206,7 @@ public class AutenticacaoService {
 
     private static String mensagemCredencial(TipoUsuario tipo) {
         return switch (tipo) {
-            case ALUNO -> "Apelido ou senha inválidos";
+            case ALUNO -> "Apelido, e-mail ou senha inválidos";
             case MONITOR -> "E-mail ou senha inválidos";
             case ADMIN -> "Nome ou senha inválidos";
         };

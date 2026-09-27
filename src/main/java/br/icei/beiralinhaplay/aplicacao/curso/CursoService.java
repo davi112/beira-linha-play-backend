@@ -94,6 +94,18 @@ public class CursoService {
         return curso;
     }
 
+    public List<Aluno> listarAlunos(Usuario solicitante, UUID cursoId) {
+        Curso curso = buscar(cursoId);
+        boolean monitorDoCurso = solicitante != null
+                && solicitante.tipo() == TipoUsuario.MONITOR
+                && curso.monitorIds().contains(solicitante.id());
+        boolean admin = solicitante != null && solicitante.tipo() == TipoUsuario.ADMIN;
+        if (!admin && !monitorDoCurso) {
+            throw new ForbiddenException("Somente o monitor deste curso ou um administrador pode ver os alunos");
+        }
+        return repositorioUsuario.listarAlunosDoCurso(cursoId);
+    }
+
     public Map<UUID, String> mapaNomesMonitores() {
         return repositorioUsuario.listarMonitores().stream()
                 .collect(Collectors.toMap(Monitor::id, Monitor::nome, (atual, ignorado) -> atual));

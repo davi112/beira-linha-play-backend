@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "aluno")
@@ -24,6 +25,9 @@ public class AlunoEntity extends UsuarioEntity {
 
     @Column(name = "imagem_perfil", columnDefinition = "TEXT")
     private String imagemPerfil;
+
+    @Column(name = "log_importacao_id")
+    private UUID logImportacaoId;
 
     @ManyToMany
     @JoinTable(
@@ -55,6 +59,14 @@ public class AlunoEntity extends UsuarioEntity {
 
     public void setImagemPerfil(String imagemPerfil) {
         this.imagemPerfil = imagemPerfil;
+    }
+
+    public UUID getLogImportacaoId() {
+        return logImportacaoId;
+    }
+
+    public void setLogImportacaoId(UUID logImportacaoId) {
+        this.logImportacaoId = logImportacaoId;
     }
 
     public Set<CursoEntity> getCursos() {

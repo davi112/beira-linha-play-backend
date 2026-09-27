@@ -11,6 +11,7 @@ public class Aluno extends Usuario {
     private String apelido;
     private int pontos;
     private String imagemPerfil;
+    private UUID logImportacaoId;
 
     public Aluno(
             UUID id,
@@ -51,6 +52,10 @@ public class Aluno extends Usuario {
         this.imagemPerfil = imagemPerfil == null ? "" : imagemPerfil;
     }
 
+    public void definirLogImportacao(UUID logImportacaoId) {
+        this.logImportacaoId = logImportacaoId;
+    }
+
     public boolean conquistou(Medalha medalha) {
         return pontos >= medalha.pontosMin();
     }
@@ -65,5 +70,9 @@ public class Aluno extends Usuario {
 
     public String imagemPerfil() {
         return imagemPerfil;
+    }
+
+    public UUID logImportacaoId() {
+        return logImportacaoId;
     }
 }

@@ -22,7 +22,9 @@ import br.icei.beiralinhaplay.dominio.medalha.MedalhaRepository;
 import br.icei.beiralinhaplay.dominio.modulo.ModuloRepository;
 import br.icei.beiralinhaplay.dominio.tentativa.TentativaRepository;
 import br.icei.beiralinhaplay.dominio.usuario.UsuarioRepository;
+import br.icei.beiralinhaplay.dominio.importacao.LogImportacaoRepository;
 import br.icei.beiralinhaplay.infraestrutura.integracoes.sympla.ImportadorParticipantesSympla;
+import br.icei.beiralinhaplay.infraestrutura.integracoes.sympla.CodificadorEventoSympla;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -93,9 +95,21 @@ public class UseCaseConfig {
 
     @Bean
     ImportarInscritosService importarInscritosService(
-            ImportadorParticipantesSympla importadorParticipantes
-    ){
-        return new ImportarInscritosService(importadorParticipantes);
+            ImportadorParticipantesSympla importadorParticipantes,
+            CodificadorEventoSympla codificadorEvento,
+            UsuarioRepository repositorioUsuario,
+            CursoRepository repositorioCurso,
+            LogImportacaoRepository repositorioLog,
+            PasswordHasher codificadorSenha
+    ) {
+        return new ImportarInscritosService(
+                importadorParticipantes,
+                codificadorEvento,
+                repositorioUsuario,
+                repositorioCurso,
+                repositorioLog,
+                codificadorSenha
+        );
     }
 
     @Bean

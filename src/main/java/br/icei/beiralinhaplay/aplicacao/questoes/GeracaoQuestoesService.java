@@ -9,9 +9,8 @@ import br.icei.beiralinhaplay.dominio.modulo.Modulo;
 import br.icei.beiralinhaplay.dominio.modulo.ModuloRepository;
 import br.icei.beiralinhaplay.dominio.usuario.TipoUsuario;
 import br.icei.beiralinhaplay.dominio.usuario.Usuario;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,7 +94,7 @@ public class GeracaoQuestoesService {
             throw new BusinessRuleException(JSON_INVALIDO);
         }
         try {
-            JsonNode raiz = mapper.readTree(extrairJson(bruto));
+            tools.jackson.databind.JsonNode raiz = mapper.readTree(extrairJson(bruto));
             JsonNode lista = raiz.isArray() ? raiz : raiz.get("questoes");
             if (lista == null || !lista.isArray()) {
                 throw new BusinessRuleException(JSON_INVALIDO);
@@ -105,13 +104,13 @@ public class GeracaoQuestoesService {
                 questoes.add(mapper.treeToValue(item, QuestaoGerada.class));
             }
             return questoes;
-        } catch (JsonProcessingException | IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ex) {
             throw new BusinessRuleException(JSON_INVALIDO);
         }
     }
 
     private static List<QuestaoGerada> validar(List<QuestaoGerada> questoes) {
-        if (questoes == null || questoes.size() < MIN_QUESTOES || questoes.size() > MAX_QUESTOES) {
+        if (questoes == null || questoes.isEmpty() || questoes.size() > MAX_QUESTOES) {
             throw new BusinessRuleException(JSON_INVALIDO);
         }
         for (QuestaoGerada questao : questoes) {

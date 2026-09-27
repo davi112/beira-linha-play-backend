@@ -67,7 +67,7 @@ public class ApplicationProperties {
     }
 
     public void setSympla(Sympla sympla) {
-        this.sympla = sympla;
+        this.sympla = sympla == null ? new Sympla() : sympla;
     }
 
     public void setCloudinary(Cloudinary cloudinary) {
@@ -203,10 +203,15 @@ public class ApplicationProperties {
         }
     }
 
-    public static class Sympla{
+    public static class Sympla {
         private String token = "";
+
         public String getToken() {
             return token;
+        }
+
+        public void setToken(String token) {
+            this.token = token == null ? "" : token;
         }
     }
 }

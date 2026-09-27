@@ -113,16 +113,19 @@ public final class DtoConverter {
             case Aluno aluno -> new UsuarioResponse(
                     id(aluno.id()), aluno.nome(), aluno.email(), TipoUsuario.ALUNO,
                     aluno.cursoIds().stream().map(DtoConverter::id).toList(),
-                    aluno.apelido(), aluno.pontos(), aluno.imagemPerfil(), null
+                    aluno.apelido(), aluno.pontos(), aluno.imagemPerfil(), null,
+                    aluno.deveDefinirSenha()
             );
             case Monitor monitor -> new UsuarioResponse(
                     id(monitor.id()), monitor.nome(), monitor.email(), TipoUsuario.MONITOR,
                     monitor.cursoIds().stream().map(DtoConverter::id).toList(),
-                    null, null, null, monitor.cursoOrigem()
+                    null, null, null, monitor.cursoOrigem(),
+                    monitor.deveDefinirSenha()
             );
             case Admin admin -> new UsuarioResponse(
                     id(admin.id()), admin.nome(), admin.email(), TipoUsuario.ADMIN,
-                    List.of(), null, null, null, null
+                    List.of(), null, null, null, null,
+                    admin.deveDefinirSenha()
             );
             default -> throw new IllegalStateException();
         };

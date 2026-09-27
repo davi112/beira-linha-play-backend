@@ -26,4 +26,7 @@ public interface AlunoJpaRepository extends JpaRepository<AlunoEntity, UUID> {
 
     @Query("select distinct a from AlunoEntity a join a.cursos c where c.id = :cursoId")
     List<AlunoEntity> findByCursoId(UUID cursoId);
+
+    @Query("select a from AlunoEntity a where a.logImportacaoId = :logId order by a.nome")
+    List<AlunoEntity> findByLogImportacaoId(UUID logId);
 }
