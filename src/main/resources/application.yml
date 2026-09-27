@@ -41,7 +41,7 @@ app:
     access-token-minutos: 15
     refresh-token-dias: 7
   cookie:
-    secure: true
+    secure: ${APP_COOKIE_SECURE}
     same-site: ${APP_COOKIE_SAME_SITE}
     access-name: blp_access
     refresh-name: blp_refresh
