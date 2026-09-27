@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +73,79 @@ class AutenticacaoServiceTest {
         assertEquals("jwt-" + GUSTAVO_ID, resultado.tokenAcesso());
         assertNotNull(resultado.tokenAtualizacao());
         assertEquals(1, tokens.porHash.size());
+    }
+
+    @Test
+    void loginAlunoComEmail() {
+        usuarios.salvar(new Aluno(
+                UUID.randomUUID(),
+                "Maria Silva",
+                "maria@email.com",
+                "hash-123456",
+                List.of(),
+                "maria",
+                0,
+                ""
+        ));
+        AutenticacaoResult resultado = servico.autenticar(
+                new AutenticarCommand(TipoUsuario.ALUNO, null, "maria@email.com", null, "123456")
+        );
+        assertEquals("maria@email.com", resultado.usuario().email());
+    }
+
+    @Test
+    void emailRepetidoExigeApelido() {
+        usuarios.salvar(new Aluno(
+                UUID.randomUUID(),
+                "Maria Silva",
+                "maria@email.com",
+                "hash-123456",
+                List.of(),
+                "maria",
+                0,
+                ""
+        ));
+        usuarios.salvar(new Aluno(
+                UUID.randomUUID(),
+                "João Silva",
+                "maria@email.com",
+                "hash-123456",
+                List.of(),
+                "joao",
+                0,
+                ""
+        ));
+
+        InvalidCredentialsException erro = assertThrows(InvalidCredentialsException.class, () -> servico.autenticar(
+                new AutenticarCommand(TipoUsuario.ALUNO, null, "maria@email.com", null, "123456")
+        ));
+        assertEquals("Este e-mail está em mais de uma conta. Entre com o apelido.", erro.getMessage());
+
+        AutenticacaoResult resultado = servico.autenticar(
+                new AutenticarCommand(TipoUsuario.ALUNO, "joao", null, null, "123456")
+        );
+        assertEquals("joao", ((Aluno) resultado.usuario()).apelido());
+    }
+
+    @Test
+    void loginRecusaAcessoExpirado() {
+        Aluno maria = new Aluno(
+                UUID.randomUUID(),
+                "Maria Silva",
+                "maria@email.com",
+                "hash-123456",
+                List.of(),
+                "maria",
+                0,
+                ""
+        );
+        maria.definirAcessoExpiraEm(LocalDate.of(2025, 12, 31));
+        usuarios.salvar(maria);
+
+        InvalidCredentialsException erro = assertThrows(InvalidCredentialsException.class, () -> servico.autenticar(
+                new AutenticarCommand(TipoUsuario.ALUNO, "maria", null, null, "123456")
+        ));
+        assertEquals("O acesso deste usuário expirou.", erro.getMessage());
     }
 
     @Test
@@ -159,6 +233,11 @@ class AutenticacaoServiceTest {
         }
 
         @Override
+        public Optional<Usuario> buscarNaoExpiradoPorId(UUID id, java.time.LocalDate hoje) {
+            return buscarPorId(id).filter(usuario -> !usuario.acessoExpirado(hoje));
+        }
+
+        @Override
         public Optional<Aluno> buscarAlunoPorId(UUID id) {
             return buscarPorId(id).filter(Aluno.class::isInstance).map(Aluno.class::cast);
         }
@@ -217,6 +296,25 @@ class AutenticacaoServiceTest {
         @Override
         public List<Aluno> listarAlunosDoCurso(UUID cursoId) {
             return List.of();
+        }
+
+        @Override
+        public Optional<Usuario> buscarPorEmail(String email) {
+            List<Usuario> encontrados = listarPorEmail(email);
+            if (encontrados.size() != 1) {
+                return Optional.empty();
+            }
+            return Optional.of(encontrados.getFirst());
+        }
+
+        @Override
+        public List<Usuario> listarPorEmail(String email) {
+            if (email == null || email.isBlank()) {
+                return List.of();
+            }
+            return porId.values().stream()
+                    .filter(usuario -> email.equalsIgnoreCase(usuario.email()))
+                    .toList();
         }
     }
 }

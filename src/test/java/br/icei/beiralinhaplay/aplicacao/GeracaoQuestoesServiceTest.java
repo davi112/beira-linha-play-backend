@@ -1,9 +1,9 @@
 package br.icei.beiralinhaplay.aplicacao;
 
-import br.icei.beiralinhaplay.aplicacao.ia.GeracaoQuestoesService;
-import br.icei.beiralinhaplay.aplicacao.ia.GeradorQuestoes;
-import br.icei.beiralinhaplay.aplicacao.ia.GerarQuestoesCommand;
-import br.icei.beiralinhaplay.aplicacao.ia.QuestaoGerada;
+import br.icei.beiralinhaplay.aplicacao.questoes.GeracaoQuestoesService;
+import br.icei.beiralinhaplay.aplicacao.questoes.GeradorQuestoes;
+import br.icei.beiralinhaplay.aplicacao.questoes.GerarQuestoesCommand;
+import br.icei.beiralinhaplay.aplicacao.questoes.QuestaoGerada;
 import br.icei.beiralinhaplay.dominio.compartilhado.BusinessRuleException;
 import br.icei.beiralinhaplay.dominio.compartilhado.ForbiddenException;
 import br.icei.beiralinhaplay.dominio.curso.Curso;
@@ -162,6 +162,11 @@ class GeracaoQuestoesServiceTest {
         @Override
         public Optional<Curso> buscarPorId(UUID id) {
             return Optional.ofNullable(porId.get(id));
+        }
+
+        @Override
+        public Optional<Curso> buscarPorCodigoAcesso(String codigo) {
+            throw new UnsupportedOperationException();
         }
 
         @Override

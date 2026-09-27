@@ -7,8 +7,14 @@ public record CursoResponse(
         String nome,
         String codigoAcesso,
         List<String> monitorIds,
+        List<String> monitorNomes,
         List<ModuloResumo> modulos
 ) {
-    public record ModuloResumo(String id, String nome, String cursoId) {
+    public record ModuloResumo(
+            String id,
+            String nome,
+            String cursoId,
+            List<ModuloResponse.AtividadeResumo> atividades
+    ) {
     }
 }

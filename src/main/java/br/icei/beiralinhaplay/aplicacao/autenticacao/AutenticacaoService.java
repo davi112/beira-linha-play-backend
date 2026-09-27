@@ -9,7 +9,6 @@ import br.icei.beiralinhaplay.dominio.compartilhado.InvalidCredentialsException;
 import br.icei.beiralinhaplay.dominio.compartilhado.ResourceNotFoundException;
 import br.icei.beiralinhaplay.dominio.compartilhado.BusinessRuleException;
 import br.icei.beiralinhaplay.dominio.compartilhado.DomainRules;
-import br.icei.beiralinhaplay.dominio.usuario.Admin;
 import br.icei.beiralinhaplay.dominio.usuario.Aluno;
 import br.icei.beiralinhaplay.dominio.usuario.Monitor;
 import br.icei.beiralinhaplay.dominio.usuario.UsuarioRepository;
@@ -19,6 +18,7 @@ import br.icei.beiralinhaplay.dominio.usuario.Usuario;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,7 +55,8 @@ public class AutenticacaoService {
         if (!codificadorSenha.confere(comando.senha(), usuario.senhaHash())) {
             throw new InvalidCredentialsException(mensagemCredencial(comando.tipo()));
         }
-        return emitirSessao(usuario);
+        exigirAcesso(usuario);
+        return criarToken(usuario);
     }
 
     public AutenticacaoResult registrar(RegistrarCommand comando) {
@@ -65,15 +66,15 @@ public class AutenticacaoService {
             case MONITOR -> registrarMonitor(comando);
             case ADMIN -> throw new BusinessRuleException("Admin não pode se cadastrar por esta rota");
         };
-        return emitirSessao(criado);
+        return criarToken(criado);
     }
 
-    public AutenticacaoResult renovar(String tokenOpaco) {
-        if (tokenOpaco == null || tokenOpaco.isBlank()) {
+    public AutenticacaoResult renovar(String token) {
+        if (token == null || token.isBlank()) {
             throw new InvalidCredentialsException("Sessão expirada");
         }
         Instant agora = Instant.now(relogio);
-        String hash = geradorTokenAtualizacao.hash(tokenOpaco);
+        String hash = geradorTokenAtualizacao.hash(token);
         TokenAtualizacao atual = repositorioTokenAtualizacao.buscarPorHash(hash)
                 .orElseThrow(() -> new InvalidCredentialsException("Sessão expirada"));
 
@@ -87,7 +88,8 @@ public class AutenticacaoService {
 
         Usuario usuario = repositorioUsuario.buscarPorId(atual.usuarioId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
-        return emitirSessao(usuario);
+        exigirAcesso(usuario);
+        return criarToken(usuario);
     }
 
     public void encerrar(String tokenOpaco) {
@@ -102,12 +104,7 @@ public class AutenticacaoService {
                 });
     }
 
-    public Usuario usuarioAutenticado(UUID usuarioId) {
-        return repositorioUsuario.buscarPorId(usuarioId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
-    }
-
-    private AutenticacaoResult emitirSessao(Usuario usuario) {
+    private AutenticacaoResult criarToken(Usuario usuario) {
         Instant agora = Instant.now(relogio);
         String opaco = geradorTokenAtualizacao.gerarTokenOpaco();
         TokenAtualizacao persistido = new TokenAtualizacao(
@@ -123,13 +120,38 @@ public class AutenticacaoService {
 
     private Usuario localizarParaLogin(AutenticarCommand comando) {
         return switch (comando.tipo()) {
-            case ALUNO -> repositorioUsuario.buscarAlunoPorApelido(comando.apelido())
-                    .orElseThrow(() -> new InvalidCredentialsException("Apelido ou senha inválidos"));
+            case ALUNO -> localizarAluno(comando);
             case MONITOR -> repositorioUsuario.buscarMonitorPorEmail(comando.email())
                     .orElseThrow(() -> new InvalidCredentialsException("E-mail ou senha inválidos"));
             case ADMIN -> repositorioUsuario.buscarAdminPorNome(comando.nome())
                     .orElseThrow(() -> new InvalidCredentialsException("Nome ou senha inválidos"));
         };
+    }
+
+    private Usuario localizarAluno(AutenticarCommand comando) {
+        String email = comando.email();
+        String apelido = comando.apelido();
+        if ((email == null || email.isBlank()) && apelido != null && apelido.contains("@")) {
+            email = apelido;
+            apelido = null;
+        }
+        if (email != null && !email.isBlank()) {
+            List<Usuario> comEmail = repositorioUsuario.listarPorEmail(email).stream()
+                    .filter(Aluno.class::isInstance)
+                    .toList();
+            if (comEmail.size() > 1) {
+                throw new InvalidCredentialsException("Este e-mail está em mais de uma conta. Entre com o apelido.");
+            }
+            if (comEmail.size() == 1) {
+                return comEmail.getFirst();
+            }
+            throw new InvalidCredentialsException("Apelido, e-mail ou senha inválidos");
+        }
+        if (apelido == null || apelido.isBlank()) {
+            throw new InvalidCredentialsException("Apelido, e-mail ou senha inválidos");
+        }
+        return repositorioUsuario.buscarAlunoPorApelido(apelido)
+                .orElseThrow(() -> new InvalidCredentialsException("Apelido, e-mail ou senha inválidos"));
     }
 
     private Aluno registrarAluno(RegistrarCommand comando) {
@@ -170,6 +192,12 @@ public class AutenticacaoService {
         return (Monitor) repositorioUsuario.salvar(monitor);
     }
 
+    private void exigirAcesso(Usuario usuario) {
+        if (usuario.acessoExpirado(LocalDate.now(relogio))) {
+            throw new InvalidCredentialsException("O acesso deste usuário expirou.");
+        }
+    }
+
     private static void validarSenha(String senha) {
         if (senha == null || senha.length() < DomainRules.SENHA_MINIMA) {
             throw new BusinessRuleException("A senha deve ter pelo menos 6 caracteres");
@@ -178,7 +206,7 @@ public class AutenticacaoService {
 
     private static String mensagemCredencial(TipoUsuario tipo) {
         return switch (tipo) {
-            case ALUNO -> "Apelido ou senha inválidos";
+            case ALUNO -> "Apelido, e-mail ou senha inválidos";
             case MONITOR -> "E-mail ou senha inválidos";
             case ADMIN -> "Nome ou senha inválidos";
         };

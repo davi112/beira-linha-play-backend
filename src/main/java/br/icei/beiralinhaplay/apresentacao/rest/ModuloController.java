@@ -1,7 +1,7 @@
 package br.icei.beiralinhaplay.apresentacao.rest;
 
 import br.icei.beiralinhaplay.aplicacao.atividade.AtividadeService;
-import br.icei.beiralinhaplay.aplicacao.ia.GeracaoQuestoesService;
+import br.icei.beiralinhaplay.aplicacao.questoes.GeracaoQuestoesService;
 import br.icei.beiralinhaplay.aplicacao.modulo.ModuloService;
 import br.icei.beiralinhaplay.apresentacao.dto.DtoConverter;
 import br.icei.beiralinhaplay.apresentacao.dto.GerarQuestoesRequest;
@@ -55,8 +55,8 @@ public class ModuloController {
     }
 
     @GetMapping("/api/modulos/{id}")
-    public ModuloResponse buscar(@PathVariable String id) {
-        var modulo = servicoModulo.buscar(DtoConverter.id(id));
+    public ModuloResponse buscar(@PathVariable String id, Authentication authentication) {
+        var modulo = servicoModulo.buscar(AuthHttp.usuario(authentication), DtoConverter.id(id));
         return DtoConverter.modulo(modulo, servicoAtividade.listarPorModulo(modulo.id()));
     }
 

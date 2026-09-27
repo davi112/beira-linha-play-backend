@@ -5,19 +5,21 @@ import br.icei.beiralinhaplay.dominio.usuario.Aluno;
 import br.icei.beiralinhaplay.dominio.usuario.Monitor;
 import br.icei.beiralinhaplay.dominio.usuario.UsuarioRepository;
 import br.icei.beiralinhaplay.dominio.usuario.Usuario;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.AdminEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.AdminJpaRepository;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.AlunoEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.AlunoJpaRepository;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.CursoEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.CursoJpaRepository;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.MonitorEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.MonitorJpaRepository;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.UsuarioJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.AdminEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.AdminJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.AlunoEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.AlunoJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.CursoEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.CursoJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.MonitorEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.MonitorJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.UsuarioEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.UsuarioJpaRepository;
 import br.icei.beiralinhaplay.infraestrutura.persistencia.mapeamento.UsuarioMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -70,6 +72,14 @@ public class UsuarioRepositoryAdapter implements UsuarioRepository {
             }
             return Optional.of(UsuarioMapper.paraDominio(jpa));
         });
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Usuario> buscarNaoExpiradoPorId(UUID id, LocalDate hoje) {
+        return usuarioJpaRepository.buscarNaoExpirado(id, hoje)
+                .map(UsuarioEntity::getId)
+                .flatMap(this::buscarPorId);
     }
 
     @Override
@@ -150,6 +160,28 @@ public class UsuarioRepositoryAdapter implements UsuarioRepository {
         return alunoJpaRepository.findByCursoId(cursoId).stream().map(UsuarioMapper::paraDominio).toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Usuario> buscarPorEmail(String email) {
+        List<Usuario> encontrados = listarPorEmail(email);
+        if (encontrados.size() != 1) {
+            return Optional.empty();
+        }
+        return Optional.of(encontrados.getFirst());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Usuario> listarPorEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return List.of();
+        }
+        return usuarioJpaRepository.findAllByEmailIgnoreCase(email.trim()).stream()
+                .map(jpa -> buscarPorId(jpa.getId()))
+                .flatMap(Optional::stream)
+                .toList();
+    }
+
     private AlunoEntity salvarAluno(Aluno aluno) {
         AlunoEntity jpa = aluno.id() == null
                 ? new AlunoEntity()
@@ -158,6 +190,7 @@ public class UsuarioRepositoryAdapter implements UsuarioRepository {
         jpa.setApelido(aluno.apelido());
         jpa.setPontos(aluno.pontos());
         jpa.setImagemPerfil(aluno.imagemPerfil());
+        jpa.setLogImportacaoId(aluno.logImportacaoId());
         jpa.setCursos(cursos(aluno.cursoIds()));
         return alunoJpaRepository.save(jpa);
     }

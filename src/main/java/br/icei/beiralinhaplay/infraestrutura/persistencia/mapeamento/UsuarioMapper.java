@@ -4,11 +4,11 @@ import br.icei.beiralinhaplay.dominio.usuario.Admin;
 import br.icei.beiralinhaplay.dominio.usuario.Aluno;
 import br.icei.beiralinhaplay.dominio.usuario.Monitor;
 import br.icei.beiralinhaplay.dominio.usuario.Usuario;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.AdminEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.AlunoEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.CursoEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.MonitorEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.UsuarioEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.AdminEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.AlunoEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.CursoEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.MonitorEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.UsuarioEntity;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,7 +29,7 @@ public final class UsuarioMapper {
 
     public static Aluno paraDominio(AlunoEntity jpa) {
         List<UUID> cursoIds = jpa.getCursos().stream().map(CursoEntity::getId).toList();
-        return new Aluno(
+        Aluno aluno = new Aluno(
                 jpa.getId(),
                 jpa.getNome(),
                 jpa.getEmail(),
@@ -39,11 +39,15 @@ public final class UsuarioMapper {
                 jpa.getPontos(),
                 jpa.getImagemPerfil()
         );
+        aluno.definirLogImportacao(jpa.getLogImportacaoId());
+        copiarAcesso(jpa, aluno);
+        marcarSenhaPendente(jpa, aluno);
+        return aluno;
     }
 
     public static Monitor paraDominio(MonitorEntity jpa) {
         List<UUID> cursoIds = jpa.getCursos().stream().map(CursoEntity::getId).toList();
-        return new Monitor(
+        Monitor monitor = new Monitor(
                 jpa.getId(),
                 jpa.getNome(),
                 jpa.getEmail(),
@@ -51,15 +55,33 @@ public final class UsuarioMapper {
                 cursoIds,
                 jpa.getCursoOrigem()
         );
+        copiarAcesso(jpa, monitor);
+        marcarSenhaPendente(jpa, monitor);
+        return monitor;
     }
 
     public static Admin paraDominio(AdminEntity jpa) {
-        return new Admin(jpa.getId(), jpa.getNome(), jpa.getEmail(), jpa.getSenha());
+        Admin admin = new Admin(jpa.getId(), jpa.getNome(), jpa.getEmail(), jpa.getSenha());
+        copiarAcesso(jpa, admin);
+        marcarSenhaPendente(jpa, admin);
+        return admin;
     }
 
     public static void copiarBase(Usuario dominio, UsuarioEntity jpa) {
         jpa.setNome(dominio.nome());
         jpa.setEmail(dominio.email());
         jpa.setSenha(dominio.senhaHash());
+        jpa.setDeveDefinirSenha(dominio.deveDefinirSenha());
+        jpa.setAcessoExpiraEm(dominio.acessoExpiraEm());
+    }
+
+    private static void copiarAcesso(UsuarioEntity jpa, Usuario dominio) {
+        dominio.definirAcessoExpiraEm(jpa.getAcessoExpiraEm());
+    }
+
+    private static void marcarSenhaPendente(UsuarioEntity jpa, Usuario dominio) {
+        if (jpa.isDeveDefinirSenha()) {
+            dominio.exigirNovaSenha();
+        }
     }
 }

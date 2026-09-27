@@ -2,6 +2,7 @@ package br.icei.beiralinhaplay.dominio.usuario;
 
 import br.icei.beiralinhaplay.dominio.compartilhado.BusinessRuleException;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +15,8 @@ public abstract class Usuario {
     private String nome;
     private String email;
     private String senhaHash;
+    private boolean deveDefinirSenha;
+    private LocalDate acessoExpiraEm;
     private final List<UUID> cursoIds = new ArrayList<>();
 
     protected Usuario(UUID id, String nome, String email, String senhaHash, List<UUID> cursoIds) {
@@ -44,6 +47,22 @@ public abstract class Usuario {
             throw new BusinessRuleException("Senha inválida");
         }
         this.senhaHash = senhaHash;
+    }
+
+    public void exigirNovaSenha() {
+        this.deveDefinirSenha = true;
+    }
+
+    public void concluirDefinicaoSenha(boolean deveDefinirSenha) {
+        this.deveDefinirSenha = deveDefinirSenha;
+    }
+
+    public void definirAcessoExpiraEm(LocalDate acessoExpiraEm) {
+        this.acessoExpiraEm = acessoExpiraEm;
+    }
+
+    public boolean acessoExpirado(LocalDate hoje) {
+        return acessoExpiraEm != null && hoje.isAfter(acessoExpiraEm);
     }
 
     public void definirId(UUID id) {
@@ -81,6 +100,14 @@ public abstract class Usuario {
 
     public String senhaHash() {
         return senhaHash;
+    }
+
+    public boolean deveDefinirSenha() {
+        return deveDefinirSenha;
+    }
+
+    public LocalDate acessoExpiraEm() {
+        return acessoExpiraEm;
     }
 
     public List<UUID> cursoIds() {

@@ -1,0 +1,2 @@
+ALTER TABLE usuario
+    ADD COLUMN deve_definir_senha BOOLEAN NOT NULL DEFAULT FALSE;

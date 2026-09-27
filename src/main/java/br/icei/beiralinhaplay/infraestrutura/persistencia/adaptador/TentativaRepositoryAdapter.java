@@ -3,13 +3,13 @@ package br.icei.beiralinhaplay.infraestrutura.persistencia.adaptador;
 import br.icei.beiralinhaplay.dominio.resposta.Resposta;
 import br.icei.beiralinhaplay.dominio.tentativa.TentativaRepository;
 import br.icei.beiralinhaplay.dominio.tentativa.Tentativa;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.AlunoJpaRepository;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.AlternativaJpaRepository;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.AtividadeJpaRepository;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.QuestaoJpaRepository;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.RespostaEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.TentativaEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.TentativaJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.AlunoJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.AlternativaJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.AtividadeJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.QuestaoJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.RespostaEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.TentativaEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.TentativaJpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,9 +57,7 @@ public class TentativaRepositoryAdapter implements TentativaRepository {
             jpa.getRespostas().add(respostaJpa);
         }
         TentativaEntity salvo = tentativaJpaRepository.save(jpa);
-        return tentativaJpaRepository.buscarCompleto(salvo.getId())
-                .map(TentativaRepositoryAdapter::paraDominio)
-                .orElseThrow();
+        return paraDominioPreservandoCorrecao(salvo, tentativa);
     }
 
     @Override
@@ -93,6 +91,30 @@ public class TentativaRepositoryAdapter implements TentativaRepository {
     @Transactional(readOnly = true)
     public Optional<Tentativa> buscarPorId(UUID id) {
         return tentativaJpaRepository.buscarCompleto(id).map(TentativaRepositoryAdapter::paraDominio);
+    }
+
+    private static Tentativa paraDominioPreservandoCorrecao(
+            TentativaEntity jpa,
+            Tentativa original
+    ) {
+        var corretaPorQuestao = original.respostas().stream()
+                .collect(java.util.stream.Collectors.toMap(Resposta::questaoId, Resposta::correta));
+        List<Resposta> respostas = jpa.getRespostas().stream()
+                .map(r -> new Resposta(
+                        r.getId(),
+                        corretaPorQuestao.getOrDefault(r.getQuestao().getId(), r.isCorreta()),
+                        r.getQuestao().getId(),
+                        r.getAlternativa().getId()
+                ))
+                .toList();
+        return new Tentativa(
+                jpa.getId(),
+                jpa.getDataEnvio(),
+                original.pontuacaoObtida(),
+                jpa.getAluno().getId(),
+                jpa.getAtividade().getId(),
+                respostas
+        );
     }
 
     private static Tentativa paraDominio(TentativaEntity jpa) {

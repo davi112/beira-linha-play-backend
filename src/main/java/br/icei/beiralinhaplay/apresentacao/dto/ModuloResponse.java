@@ -8,6 +8,6 @@ public record ModuloResponse(
         String cursoId,
         List<AtividadeResumo> atividades
 ) {
-    public record AtividadeResumo(String id, String titulo, int quantQuestoes, String moduloId) {
+    public record AtividadeResumo(String id, String titulo, int quantQuestoes, String moduloId, int xpTotal) {
     }
 }

@@ -8,6 +8,7 @@ import br.icei.beiralinhaplay.dominio.curso.Curso;
 import br.icei.beiralinhaplay.dominio.curso.CursoRepository;
 import br.icei.beiralinhaplay.dominio.modulo.Modulo;
 import br.icei.beiralinhaplay.dominio.modulo.ModuloRepository;
+import br.icei.beiralinhaplay.dominio.compartilhado.ForbiddenException;
 import br.icei.beiralinhaplay.dominio.usuario.Monitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,25 @@ class ModuloServiceTest {
         cursos.porId.put(CURSO_ID, new Curso(CURSO_ID, "ED", "ABC123", List.of(MONITOR_ID), List.of(MODULO_ID)));
         modulos.porId.put(MODULO_ID, new Modulo(MODULO_ID, "Listas", CURSO_ID, List.of()));
         servico = new ModuloService(modulos, cursos, atividades);
+    }
+
+    @Test
+    void bloqueiaLeituraQuandoMonitorNaoAlocado() {
+        Monitor outro = new Monitor(
+                UUID.fromString("00000000-0000-4000-8000-000000000023"),
+                "Bia",
+                "bia@icei.br",
+                "hash",
+                List.of(),
+                "ICEI"
+        );
+
+        assertThrows(ForbiddenException.class, () -> servico.buscar(outro, MODULO_ID));
+    }
+
+    @Test
+    void permiteLeituraQuandoMonitorAlocado() {
+        assertEquals("Listas", servico.buscar(monitor, MODULO_ID).nome());
     }
 
     @Test
@@ -107,6 +127,11 @@ class ModuloServiceTest {
         @Override
         public Optional<Curso> buscarPorId(UUID id) {
             return Optional.ofNullable(porId.get(id));
+        }
+
+        @Override
+        public Optional<Curso> buscarPorCodigoAcesso(String codigo) {
+            throw new UnsupportedOperationException();
         }
 
         @Override

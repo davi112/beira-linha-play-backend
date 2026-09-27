@@ -3,13 +3,15 @@ package br.icei.beiralinhaplay.infraestrutura.configuracao;
 import br.icei.beiralinhaplay.aplicacao.atividade.AtividadeService;
 import br.icei.beiralinhaplay.aplicacao.autenticacao.AutenticacaoService;
 import br.icei.beiralinhaplay.aplicacao.curso.CursoService;
-import br.icei.beiralinhaplay.aplicacao.ia.GeracaoQuestoesService;
-import br.icei.beiralinhaplay.aplicacao.ia.GeradorQuestoes;
+import br.icei.beiralinhaplay.aplicacao.questoes.GeracaoQuestoesService;
+import br.icei.beiralinhaplay.aplicacao.questoes.GeradorQuestoes;
+import br.icei.beiralinhaplay.aplicacao.medalha.ArmazenamentoImagem;
 import br.icei.beiralinhaplay.aplicacao.medalha.MedalhaService;
 import br.icei.beiralinhaplay.aplicacao.modulo.ModuloService;
 import br.icei.beiralinhaplay.aplicacao.ranking.RankingService;
 import br.icei.beiralinhaplay.aplicacao.tentativa.TentativaService;
 import br.icei.beiralinhaplay.aplicacao.usuario.ContaService;
+import br.icei.beiralinhaplay.aplicacao.usuario.ImportarInscritosService;
 import br.icei.beiralinhaplay.dominio.atividade.AtividadeRepository;
 import br.icei.beiralinhaplay.dominio.autenticacao.PasswordHasher;
 import br.icei.beiralinhaplay.dominio.autenticacao.RefreshTokenGenerator;
@@ -20,6 +22,9 @@ import br.icei.beiralinhaplay.dominio.medalha.MedalhaRepository;
 import br.icei.beiralinhaplay.dominio.modulo.ModuloRepository;
 import br.icei.beiralinhaplay.dominio.tentativa.TentativaRepository;
 import br.icei.beiralinhaplay.dominio.usuario.UsuarioRepository;
+import br.icei.beiralinhaplay.dominio.importacao.LogImportacaoRepository;
+import br.icei.beiralinhaplay.infraestrutura.integracoes.sympla.ImportadorParticipantesSympla;
+import br.icei.beiralinhaplay.infraestrutura.integracoes.sympla.CodificadorEventoSympla;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,7 +63,10 @@ public class UseCaseConfig {
     }
 
     @Bean
-    ContaService servicoConta(UsuarioRepository repositorioUsuario, PasswordHasher codificadorSenha) {
+    ContaService servicoConta(
+            UsuarioRepository repositorioUsuario,
+            PasswordHasher codificadorSenha
+    ) {
         return new ContaService(repositorioUsuario, codificadorSenha);
     }
 
@@ -83,6 +91,25 @@ public class UseCaseConfig {
             GeradorQuestoes geradorQuestoes
     ) {
         return new GeracaoQuestoesService(repositorioModulo, repositorioCurso, geradorQuestoes);
+    }
+
+    @Bean
+    ImportarInscritosService importarInscritosService(
+            ImportadorParticipantesSympla importadorParticipantes,
+            CodificadorEventoSympla codificadorEvento,
+            UsuarioRepository repositorioUsuario,
+            CursoRepository repositorioCurso,
+            LogImportacaoRepository repositorioLog,
+            PasswordHasher codificadorSenha
+    ) {
+        return new ImportarInscritosService(
+                importadorParticipantes,
+                codificadorEvento,
+                repositorioUsuario,
+                repositorioCurso,
+                repositorioLog,
+                codificadorSenha
+        );
     }
 
     @Bean
@@ -119,7 +146,11 @@ public class UseCaseConfig {
     }
 
     @Bean
-    MedalhaService servicoMedalha(MedalhaRepository repositorioMedalha, UsuarioRepository repositorioUsuario) {
-        return new MedalhaService(repositorioMedalha, repositorioUsuario);
+    MedalhaService servicoMedalha(
+            MedalhaRepository repositorioMedalha,
+            UsuarioRepository repositorioUsuario,
+            ArmazenamentoImagem armazenamentoImagem
+    ) {
+        return new MedalhaService(repositorioMedalha, repositorioUsuario, armazenamentoImagem);
     }
 }

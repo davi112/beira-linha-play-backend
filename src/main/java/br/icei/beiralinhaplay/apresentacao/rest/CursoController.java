@@ -1,11 +1,16 @@
 package br.icei.beiralinhaplay.apresentacao.rest;
 
+import br.icei.beiralinhaplay.aplicacao.atividade.AtividadeService;
 import br.icei.beiralinhaplay.aplicacao.curso.CursoService;
 import br.icei.beiralinhaplay.aplicacao.modulo.ModuloService;
 import br.icei.beiralinhaplay.apresentacao.dto.DtoConverter;
+import br.icei.beiralinhaplay.apresentacao.dto.AlunoResumoResponse;
 import br.icei.beiralinhaplay.apresentacao.dto.CursoResponse;
 import br.icei.beiralinhaplay.apresentacao.dto.InscreverCursoRequest;
 import br.icei.beiralinhaplay.apresentacao.dto.SalvarCursoRequest;
+import br.icei.beiralinhaplay.dominio.atividade.Atividade;
+import br.icei.beiralinhaplay.dominio.curso.Curso;
+import br.icei.beiralinhaplay.dominio.modulo.Modulo;
 import br.icei.beiralinhaplay.dominio.usuario.TipoUsuario;
 import br.icei.beiralinhaplay.dominio.usuario.Usuario;
 import jakarta.validation.Valid;
@@ -22,6 +27,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/cursos")
@@ -29,27 +37,40 @@ public class CursoController {
 
     private final CursoService servicoCurso;
     private final ModuloService servicoModulo;
+    private final AtividadeService servicoAtividade;
 
-    public CursoController(CursoService servicoCurso, ModuloService servicoModulo) {
+    public CursoController(
+            CursoService servicoCurso,
+            ModuloService servicoModulo,
+            AtividadeService servicoAtividade
+    ) {
         this.servicoCurso = servicoCurso;
         this.servicoModulo = servicoModulo;
+        this.servicoAtividade = servicoAtividade;
     }
 
     @GetMapping
     public List<CursoResponse> listar(Authentication authentication) {
         Usuario usuario = AuthHttp.usuario(authentication);
         boolean codigo = usuario.tipo() != TipoUsuario.ALUNO;
-        return servicoCurso.listar().stream()
-                .map(curso -> DtoConverter.curso(curso, servicoModulo.listarPorCurso(curso.id()), codigo))
+        return servicoCurso.listar(usuario).stream()
+                .map(curso -> paraResposta(curso, codigo))
+                .toList();
+    }
+
+    @GetMapping("/{id}/alunos")
+    public List<AlunoResumoResponse> alunos(@PathVariable String id, Authentication authentication) {
+        return servicoCurso.listarAlunos(AuthHttp.usuario(authentication), DtoConverter.id(id)).stream()
+                .map(aluno -> new AlunoResumoResponse(aluno.nome(), aluno.email(), aluno.apelido()))
                 .toList();
     }
 
     @GetMapping("/{id}")
     public CursoResponse buscar(@PathVariable String id, Authentication authentication) {
         Usuario usuario = AuthHttp.usuario(authentication);
-        var curso = servicoCurso.buscar(DtoConverter.id(id));
+        var curso = servicoCurso.buscar(usuario, DtoConverter.id(id));
         boolean codigo = usuario.tipo() != TipoUsuario.ALUNO;
-        return DtoConverter.curso(curso, servicoModulo.listarPorCurso(curso.id()), codigo);
+        return paraResposta(curso, codigo);
     }
 
     @PostMapping
@@ -59,7 +80,7 @@ public class CursoController {
             @Valid @RequestBody SalvarCursoRequest requisicao
     ) {
         var curso = servicoCurso.criar(AuthHttp.usuario(authentication), DtoConverter.comando(requisicao));
-        return DtoConverter.curso(curso, List.of(), true);
+        return paraResposta(curso, true);
     }
 
     @PatchMapping("/{id}")
@@ -73,13 +94,25 @@ public class CursoController {
                 DtoConverter.id(id),
                 DtoConverter.comando(requisicao)
         );
-        return DtoConverter.curso(curso, servicoModulo.listarPorCurso(curso.id()), true);
+        return paraResposta(curso, true);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void excluir(@PathVariable String id, Authentication authentication) {
         servicoCurso.excluir(AuthHttp.usuario(authentication), DtoConverter.id(id));
+    }
+
+    @PostMapping("/inscrever")
+    public CursoResponse inscreverPorCodigo(
+            Authentication authentication,
+            @Valid @RequestBody InscreverCursoRequest requisicao
+    ) {
+        var curso = servicoCurso.inscreverPorCodigo(
+                AuthHttp.usuario(authentication),
+                requisicao.codigoAcesso()
+        );
+        return paraResposta(curso, false);
     }
 
     @PostMapping("/{id}/inscrever")
@@ -93,6 +126,22 @@ public class CursoController {
                 DtoConverter.id(id),
                 requisicao.codigoAcesso()
         );
-        return DtoConverter.curso(curso, servicoModulo.listarPorCurso(curso.id()), false);
+        return paraResposta(curso, false);
+    }
+
+    private CursoResponse paraResposta(Curso curso, boolean incluirCodigo) {
+        List<Modulo> modulos = servicoModulo.listarPorCurso(curso.id());
+        Map<UUID, List<Atividade>> atividadesPorModulo = modulos.stream()
+                .collect(Collectors.toMap(
+                        Modulo::id,
+                        modulo -> servicoAtividade.listarPorModulo(modulo.id())
+                ));
+        return DtoConverter.curso(
+                curso,
+                modulos,
+                incluirCodigo,
+                servicoCurso.mapaNomesMonitores(),
+                atividadesPorModulo
+        );
     }
 }

@@ -2,20 +2,36 @@ package br.icei.beiralinhaplay.infraestrutura.configuracao;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @ConfigurationProperties(prefix = "app")
 public class ApplicationProperties {
 
-    private String allowedHosts = "http://localhost:5173";
+    private List<String> allowedHosts = new ArrayList<>();
     private Jwt jwt = new Jwt();
     private Cookie cookie = new Cookie();
     private Gemini gemini = new Gemini();
+    private Cloudinary cloudinary = new Cloudinary();
+    private Sympla sympla = new Sympla();
 
-    public String getAllowedHosts() {
+    public List<String> getAllowedHosts() {
         return allowedHosts;
     }
 
-    public void setAllowedHosts(String allowedHosts) {
-        this.allowedHosts = allowedHosts;
+    public void setAllowedHosts(List<String> allowedHosts) {
+        this.allowedHosts = allowedHosts == null ? new ArrayList<>() : allowedHosts;
+    }
+
+    public List<String> origensCors() {
+        return allowedHosts.stream()
+                .flatMap(valor -> Arrays.stream(valor.split("[,;]+")))
+                .map(String::trim)
+                .map(origem -> origem.replaceAll("^['\"]|['\"]$", ""))
+                .filter(origem -> !origem.isEmpty())
+                .distinct()
+                .toList();
     }
 
     public Jwt getJwt() {
@@ -40,6 +56,22 @@ public class ApplicationProperties {
 
     public void setGemini(Gemini gemini) {
         this.gemini = gemini;
+    }
+
+    public Cloudinary getCloudinary() {
+        return cloudinary;
+    }
+
+    public Sympla getSympla() {
+        return sympla;
+    }
+
+    public void setSympla(Sympla sympla) {
+        this.sympla = sympla == null ? new Sympla() : sympla;
+    }
+
+    public void setCloudinary(Cloudinary cloudinary) {
+        this.cloudinary = cloudinary == null ? new Cloudinary() : cloudinary;
     }
 
     public static class Jwt {
@@ -129,6 +161,57 @@ public class ApplicationProperties {
 
         public void setModel(String model) {
             this.model = model;
+        }
+    }
+
+    public static class Cloudinary {
+        private String cloudName = "";
+        private String apiKey = "";
+        private String apiSecret = "";
+        private String folder = "medalhas";
+
+        public String getCloudName() {
+            return cloudName;
+        }
+
+        public void setCloudName(String cloudName) {
+            this.cloudName = cloudName == null ? "" : cloudName;
+        }
+
+        public String getApiKey() {
+            return apiKey;
+        }
+
+        public void setApiKey(String apiKey) {
+            this.apiKey = apiKey == null ? "" : apiKey;
+        }
+
+        public String getApiSecret() {
+            return apiSecret;
+        }
+
+        public void setApiSecret(String apiSecret) {
+            this.apiSecret = apiSecret == null ? "" : apiSecret;
+        }
+
+        public String getFolder() {
+            return folder;
+        }
+
+        public void setFolder(String folder) {
+            this.folder = folder == null ? "" : folder;
+        }
+    }
+
+    public static class Sympla {
+        private String token = "";
+
+        public String getToken() {
+            return token;
+        }
+
+        public void setToken(String token) {
+            this.token = token == null ? "" : token;
         }
     }
 }

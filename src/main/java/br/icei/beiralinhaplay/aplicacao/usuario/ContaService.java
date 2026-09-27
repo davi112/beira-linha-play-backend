@@ -12,7 +12,7 @@ import br.icei.beiralinhaplay.dominio.usuario.UsuarioRepository;
 import br.icei.beiralinhaplay.dominio.usuario.TipoUsuario;
 import br.icei.beiralinhaplay.dominio.usuario.Usuario;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class ContaService {
@@ -20,7 +20,10 @@ public class ContaService {
     private final UsuarioRepository repositorioUsuario;
     private final PasswordHasher codificadorSenha;
 
-    public ContaService(UsuarioRepository repositorioUsuario, PasswordHasher codificadorSenha) {
+    public ContaService(
+            UsuarioRepository repositorioUsuario,
+            PasswordHasher codificadorSenha
+    ) {
         this.repositorioUsuario = repositorioUsuario;
         this.codificadorSenha = codificadorSenha;
     }
@@ -55,6 +58,9 @@ public class ContaService {
                 throw new BusinessRuleException("A senha deve ter pelo menos 6 caracteres");
             }
             usuario.definirSenhaHash(codificadorSenha.codificar(comando.senha()));
+            //usuario.concluirDefinicaoSenha(false);
+        } else if (usuario.deveDefinirSenha()) {
+            throw new BusinessRuleException("Defina uma nova senha para continuar");
         }
 
         return repositorioUsuario.salvar(usuario);
@@ -74,8 +80,8 @@ public class ContaService {
         return (Admin) repositorioUsuario.salvar(admin);
     }
 
-    public java.util.List<Monitor> listarMonitores(Usuario solicitante) {
-        if (!TipoUsuario.aptosGerenciamentoCursos().contains(solicitante.tipo())) {
+    public List<Monitor> listarMonitores(Usuario solicitante) {
+        if (solicitante == null) {
             throw new ForbiddenException();
         }
         return repositorioUsuario.listarMonitores();

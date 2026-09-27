@@ -2,7 +2,6 @@ package br.icei.beiralinhaplay.infraestrutura.seguranca;
 
 import br.icei.beiralinhaplay.dominio.autenticacao.AccessTokenProvider;
 import br.icei.beiralinhaplay.dominio.usuario.UsuarioRepository;
-import br.icei.beiralinhaplay.dominio.usuario.Usuario;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -15,6 +14,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Component
@@ -44,15 +45,15 @@ public class JwtFilter extends OncePerRequestFilter {
         if (token != null && !token.isBlank()) {
             try {
                 AccessTokenProvider.ClaimsToken claims = provedorTokenAcesso.validar(token);
-                Usuario usuario = repositorioUsuario.buscarPorId(claims.usuarioId()).orElse(null);
-                if (usuario != null) {
-                    var autenticacao = new UsernamePasswordAuthenticationToken(
-                            usuario,
-                            null,
-                            List.of(new SimpleGrantedAuthority("ROLE_" + usuario.tipo().name()))
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(autenticacao);
-                }
+                repositorioUsuario
+                        .buscarNaoExpiradoPorId(claims.usuarioId(), LocalDate.now(ZoneOffset.UTC))
+                        .ifPresent(usuario -> SecurityContextHolder.getContext().setAuthentication(
+                                new UsernamePasswordAuthenticationToken(
+                                        usuario,
+                                        null,
+                                        List.of(new SimpleGrantedAuthority("ROLE_" + usuario.tipo().name()))
+                                )
+                        ));
             } catch (Exception ignored) {
                 SecurityContextHolder.clearContext();
             }

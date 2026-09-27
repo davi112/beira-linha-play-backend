@@ -2,11 +2,11 @@ package br.icei.beiralinhaplay.infraestrutura.persistencia.adaptador;
 
 import br.icei.beiralinhaplay.dominio.atividade.Atividade;
 import br.icei.beiralinhaplay.dominio.atividade.AtividadeRepository;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.AtividadeEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.AtividadeJpaRepository;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.ModuloEntity;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.ModuloJpaRepository;
-import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.TentativaJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.AtividadeEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.AtividadeJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.entidades.ModuloEntity;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.ModuloJpaRepository;
+import br.icei.beiralinhaplay.infraestrutura.persistencia.jpa.repositorios.TentativaJpaRepository;
 import br.icei.beiralinhaplay.infraestrutura.persistencia.mapeamento.ConteudoMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;

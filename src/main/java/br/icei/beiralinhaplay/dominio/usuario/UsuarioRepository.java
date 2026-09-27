@@ -1,5 +1,6 @@
 package br.icei.beiralinhaplay.dominio.usuario;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -9,6 +10,8 @@ public interface UsuarioRepository {
     Usuario salvar(Usuario usuario);
 
     Optional<Usuario> buscarPorId(UUID id);
+
+    Optional<Usuario> buscarNaoExpiradoPorId(UUID id, LocalDate hoje);
 
     Optional<Aluno> buscarAlunoPorId(UUID id);
 
@@ -31,4 +34,8 @@ public interface UsuarioRepository {
     List<Aluno> listarAlunos();
 
     List<Aluno> listarAlunosDoCurso(UUID cursoId);
+
+    Optional<Usuario> buscarPorEmail(String email);
+
+    List<Usuario> listarPorEmail(String email);
 }

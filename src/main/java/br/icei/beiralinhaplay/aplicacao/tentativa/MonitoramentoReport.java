@@ -8,8 +8,10 @@ import br.icei.beiralinhaplay.dominio.tentativa.Tentativa;
 import br.icei.beiralinhaplay.dominio.usuario.Aluno;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public record MonitoramentoReport(
         int tamanhoTurma,
@@ -37,16 +39,28 @@ public record MonitoramentoReport(
     ) {
     }
 
-    public static MonitoramentoReport calcular(Atividade atividade, List<Aluno> turma, List<Tentativa> ultimas) {
-        int envios = ultimas.size();
+    public static List<Tentativa> melhorPorAluno(List<Tentativa> tentativas) {
+        return tentativas.stream()
+                .collect(Collectors.groupingBy(Tentativa::alunoId))
+                .values()
+                .stream()
+                .map(lista -> lista.stream()
+                        .max(Comparator.comparingInt(Tentativa::pontuacaoObtida)
+                                .thenComparing(Tentativa::dataEnvio))
+                        .orElseThrow())
+                .toList();
+    }
+
+    public static MonitoramentoReport calcular(Atividade atividade, List<Aluno> turma, List<Tentativa> melhores) {
+        int envios = melhores.size();
         int xpTotal = atividade.xpTotal();
         int mediaPontuacao = envios == 0
                 ? 0
-                : (int) Math.round(ultimas.stream().mapToInt(Tentativa::pontuacaoObtida).average().orElse(0));
+                : (int) Math.round(melhores.stream().mapToInt(Tentativa::pontuacaoObtida).average().orElse(0));
 
         int mediaAcerto = envios == 0
                 ? 0
-                : (int) Math.round(ultimas.stream().mapToDouble(t -> {
+                : (int) Math.round(melhores.stream().mapToDouble(t -> {
                     long corretas = t.respostas().stream().filter(Resposta::correta).count();
                     return (double) corretas / Math.max(atividade.quantQuestoes(), 1);
                 }).average().orElse(0) * 100);
@@ -57,7 +71,7 @@ public record MonitoramentoReport(
             int[] votos = new int[questao.alternativas().size()];
             for (int a = 0; a < questao.alternativas().size(); a++) {
                 UUID altId = questao.alternativas().get(a).id();
-                votos[a] = (int) ultimas.stream()
+                votos[a] = (int) melhores.stream()
                         .filter(t -> t.respostas().stream().anyMatch(r -> r.alternativaId().equals(altId)))
                         .count();
             }
@@ -91,7 +105,7 @@ public record MonitoramentoReport(
         }
 
         List<LinhaAluno> linhas = turma.stream().map(aluno -> {
-            Tentativa tentativa = ultimas.stream()
+            Tentativa tentativa = melhores.stream()
                     .filter(t -> t.alunoId().equals(aluno.id()))
                     .findFirst()
                     .orElse(null);

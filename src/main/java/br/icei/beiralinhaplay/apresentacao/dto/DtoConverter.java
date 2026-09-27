@@ -4,9 +4,8 @@ import br.icei.beiralinhaplay.aplicacao.atividade.SalvarAtividadeCommand;
 import br.icei.beiralinhaplay.aplicacao.autenticacao.AutenticarCommand;
 import br.icei.beiralinhaplay.aplicacao.autenticacao.RegistrarCommand;
 import br.icei.beiralinhaplay.aplicacao.curso.SalvarCursoCommand;
-import br.icei.beiralinhaplay.aplicacao.ia.GerarQuestoesCommand;
-import br.icei.beiralinhaplay.aplicacao.ia.QuestaoGerada;
-import br.icei.beiralinhaplay.aplicacao.medalha.SalvarMedalhaCommand;
+import br.icei.beiralinhaplay.aplicacao.questoes.GerarQuestoesCommand;
+import br.icei.beiralinhaplay.aplicacao.questoes.QuestaoGerada;
 import br.icei.beiralinhaplay.aplicacao.medalha.MedalhaComStatus;
 import br.icei.beiralinhaplay.aplicacao.modulo.SalvarModuloCommand;
 import br.icei.beiralinhaplay.aplicacao.ranking.RankingPosition;
@@ -109,38 +108,74 @@ public final class DtoConverter {
         return new EnviarTentativaCommand(mapa);
     }
 
-    public static SalvarMedalhaCommand comando(SalvarMedalhaRequest req) {
-        return new SalvarMedalhaCommand(req.nome(), req.imagemUrl(), req.pontosMin());
-    }
-
     public static UsuarioResponse usuario(Usuario usuario) {
         return switch (usuario) {
             case Aluno aluno -> new UsuarioResponse(
                     id(aluno.id()), aluno.nome(), aluno.email(), TipoUsuario.ALUNO,
                     aluno.cursoIds().stream().map(DtoConverter::id).toList(),
-                    aluno.apelido(), aluno.pontos(), aluno.imagemPerfil(), null
+                    aluno.apelido(), aluno.pontos(), aluno.imagemPerfil(), null,
+                    aluno.deveDefinirSenha()
             );
             case Monitor monitor -> new UsuarioResponse(
                     id(monitor.id()), monitor.nome(), monitor.email(), TipoUsuario.MONITOR,
                     monitor.cursoIds().stream().map(DtoConverter::id).toList(),
-                    null, null, null, monitor.cursoOrigem()
+                    null, null, null, monitor.cursoOrigem(),
+                    monitor.deveDefinirSenha()
             );
             case Admin admin -> new UsuarioResponse(
                     id(admin.id()), admin.nome(), admin.email(), TipoUsuario.ADMIN,
-                    List.of(), null, null, null, null
+                    List.of(), null, null, null, null,
+                    admin.deveDefinirSenha()
             );
             default -> throw new IllegalStateException();
         };
     }
 
     public static CursoResponse curso(Curso curso, List<Modulo> modulos, boolean incluirCodigo) {
+        return curso(curso, modulos, incluirCodigo, Map.of(), Map.of());
+    }
+
+    public static CursoResponse curso(
+            Curso curso,
+            List<Modulo> modulos,
+            boolean incluirCodigo,
+            Map<UUID, String> nomesMonitores
+    ) {
+        return curso(curso, modulos, incluirCodigo, nomesMonitores, Map.of());
+    }
+
+    public static CursoResponse curso(
+            Curso curso,
+            List<Modulo> modulos,
+            boolean incluirCodigo,
+            Map<UUID, String> nomesMonitores,
+            Map<UUID, List<Atividade>> atividadesPorModulo
+    ) {
+        List<String> nomes = curso.monitorIds().stream()
+                .map(nomesMonitores::get)
+                .filter(nome -> nome != null && !nome.isBlank())
+                .toList();
         return new CursoResponse(
                 id(curso.id()),
                 curso.nome(),
                 incluirCodigo ? curso.codigoAcesso() : null,
                 curso.monitorIds().stream().map(DtoConverter::id).toList(),
+                nomes,
                 modulos.stream()
-                        .map(m -> new CursoResponse.ModuloResumo(id(m.id()), m.nome(), id(m.cursoId())))
+                        .map(m -> new CursoResponse.ModuloResumo(
+                                id(m.id()),
+                                m.nome(),
+                                id(m.cursoId()),
+                                atividadesPorModulo.getOrDefault(m.id(), List.of()).stream()
+                                        .map(a -> new ModuloResponse.AtividadeResumo(
+                                                id(a.id()),
+                                                a.titulo(),
+                                                a.quantQuestoes(),
+                                                id(a.moduloId()),
+                                                a.xpTotal()
+                                        ))
+                                        .toList()
+                        ))
                         .toList()
         );
     }
@@ -151,7 +186,13 @@ public final class DtoConverter {
                 modulo.nome(),
                 id(modulo.cursoId()),
                 atividades.stream()
-                        .map(a -> new ModuloResponse.AtividadeResumo(id(a.id()), a.titulo(), a.quantQuestoes(), id(a.moduloId())))
+                        .map(a -> new ModuloResponse.AtividadeResumo(
+                                id(a.id()),
+                                a.titulo(),
+                                a.quantQuestoes(),
+                                id(a.moduloId()),
+                                a.xpTotal()
+                        ))
                         .toList()
         );
     }

@@ -9,5 +9,4 @@ public record RegistrarCommand(
         String email,
         String senha,
         String cursoOrigem
-) {
-}
+) { }

@@ -8,5 +8,4 @@ public record AutenticarCommand(
         String email,
         String nome,
         String senha
-) {
-}
+) { }

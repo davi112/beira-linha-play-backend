@@ -17,7 +17,6 @@ import br.icei.beiralinhaplay.dominio.usuario.Usuario;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -107,14 +106,9 @@ public class TentativaService {
 
         List<Aluno> turma = repositorioUsuario.listarAlunosDoCurso(curso.id());
         List<Tentativa> tentativas = repositorioTentativa.listarPorAtividade(atividadeId);
-        List<Tentativa> ultimaPorAluno = tentativas.stream()
-                .collect(java.util.stream.Collectors.groupingBy(Tentativa::alunoId))
-                .values()
-                .stream()
-                .map(lista -> lista.stream().max(Comparator.comparing(Tentativa::dataEnvio)).orElseThrow())
-                .toList();
+        List<Tentativa> melhorPorAluno = MonitoramentoReport.melhorPorAluno(tentativas);
 
-        return MonitoramentoReport.calcular(atividade, turma, ultimaPorAluno);
+        return MonitoramentoReport.calcular(atividade, turma, melhorPorAluno);
     }
 
     private void garantirInscricao(Aluno aluno, Atividade atividade) {

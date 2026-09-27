@@ -13,6 +13,7 @@ public record UsuarioResponse(
         String apelido,
         Integer pontos,
         String imagemPerfil,
-        String cursoOrigem
+        String cursoOrigem,
+        boolean deveDefinirSenha
 ) {
 }
