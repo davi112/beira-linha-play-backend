@@ -13,6 +13,7 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -34,6 +35,12 @@ public abstract class UsuarioEntity {
 
     @Column(nullable = false, length = 100)
     private String senha;
+
+    @Column(name = "deve_definir_senha", nullable = false)
+    private boolean deveDefinirSenha;
+
+    @Column(name = "acesso_expira_em")
+    private LocalDate acessoExpiraEm;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, insertable = false, updatable = false)
@@ -69,6 +76,22 @@ public abstract class UsuarioEntity {
 
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    public boolean isDeveDefinirSenha() {
+        return deveDefinirSenha;
+    }
+
+    public void setDeveDefinirSenha(boolean deveDefinirSenha) {
+        this.deveDefinirSenha = deveDefinirSenha;
+    }
+
+    public LocalDate getAcessoExpiraEm() {
+        return acessoExpiraEm;
+    }
+
+    public void setAcessoExpiraEm(LocalDate acessoExpiraEm) {
+        this.acessoExpiraEm = acessoExpiraEm;
     }
 
     public TipoUsuario getTipo() {

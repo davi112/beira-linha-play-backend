@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<ErrorResponse> regra(BusinessRuleException ex) {
-        return erro(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+        return erro(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(ServiceUnavailableException.class)
@@ -64,7 +64,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorResponse> arquivoGrande(MaxUploadSizeExceededException ex) {
-        return erro(HttpStatus.PAYLOAD_TOO_LARGE, "A imagem deve ter no máximo 2 MB");
+        return erro(HttpStatus.BAD_REQUEST, "A imagem deve ter no máximo 2 MB");
     }
 
     @ExceptionHandler(MissingServletRequestPartException.class)

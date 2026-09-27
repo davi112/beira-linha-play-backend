@@ -84,6 +84,11 @@ class ContaServiceTest {
         }
 
         @Override
+        public Optional<Usuario> buscarNaoExpiradoPorId(UUID id, java.time.LocalDate hoje) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public Optional<Aluno> buscarAlunoPorId(UUID id) {
             throw new UnsupportedOperationException();
         }
@@ -135,6 +140,16 @@ class ContaServiceTest {
 
         @Override
         public List<Aluno> listarAlunosDoCurso(UUID cursoId) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Optional<Usuario> buscarPorEmail(String email) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<Usuario> listarPorEmail(String email) {
             throw new UnsupportedOperationException();
         }
     }

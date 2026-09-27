@@ -4,6 +4,7 @@ import br.icei.beiralinhaplay.aplicacao.atividade.AtividadeService;
 import br.icei.beiralinhaplay.aplicacao.curso.CursoService;
 import br.icei.beiralinhaplay.aplicacao.modulo.ModuloService;
 import br.icei.beiralinhaplay.apresentacao.dto.DtoConverter;
+import br.icei.beiralinhaplay.apresentacao.dto.AlunoResumoResponse;
 import br.icei.beiralinhaplay.apresentacao.dto.CursoResponse;
 import br.icei.beiralinhaplay.apresentacao.dto.InscreverCursoRequest;
 import br.icei.beiralinhaplay.apresentacao.dto.SalvarCursoRequest;
@@ -54,6 +55,13 @@ public class CursoController {
         boolean codigo = usuario.tipo() != TipoUsuario.ALUNO;
         return servicoCurso.listar(usuario).stream()
                 .map(curso -> paraResposta(curso, codigo))
+                .toList();
+    }
+
+    @GetMapping("/{id}/alunos")
+    public List<AlunoResumoResponse> alunos(@PathVariable String id, Authentication authentication) {
+        return servicoCurso.listarAlunos(AuthHttp.usuario(authentication), DtoConverter.id(id)).stream()
+                .map(aluno -> new AlunoResumoResponse(aluno.nome(), aluno.email(), aluno.apelido()))
                 .toList();
     }
 

@@ -58,6 +58,9 @@ public class ContaService {
                 throw new BusinessRuleException("A senha deve ter pelo menos 6 caracteres");
             }
             usuario.definirSenhaHash(codificadorSenha.codificar(comando.senha()));
+            //usuario.concluirDefinicaoSenha(false);
+        } else if (usuario.deveDefinirSenha()) {
+            throw new BusinessRuleException("Defina uma nova senha para continuar");
         }
 
         return repositorioUsuario.salvar(usuario);
